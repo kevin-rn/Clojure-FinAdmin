@@ -14,7 +14,7 @@
      :body (views/transactions-html storage/get-all-transactions)})
   
   (defn add-transaction [{:keys [params]}]
-    (storage/add-transaction! {:id (rand-int 10000)
+    (storage/add-transaction! {:id (random-uuid)
                           :desc (params "desc")
                           :amount (Double/parseDouble (params "amount"))})
     {:status 200
