@@ -1,21 +1,19 @@
 (ns finadmin.handlers
     (:require
-     [finadmin.storage :as storage]
      [finadmin.views :as views]))
-  
-  (defn home-page [_]
+ 
+  ;; Sign in and up handlers
+  (defn sign-in-page [_]
     {:status 200
      :headers {"Content-Type" "text/html"}
-     :body (views/home storage/get-all-transactions)})
+     :body (views/login "sign-in")})
   
-  (defn get-transactions [_]
+  (defn sign-up-page [_]
     {:status 200
      :headers {"Content-Type" "text/html"}
-     :body (views/transactions-html storage/get-all-transactions)})
+     :body (views/login "sign-up")})
   
-  (defn add-transaction [{:keys [params]}]
-    (storage/add-transaction! {:id (random-uuid)
-                          :desc (params "desc")
-                          :amount (Double/parseDouble (params "amount"))})
+  (defn dashboard-page [_]
     {:status 200
-     :headers {"HX-Trigger" "update-transactions"}})
+     :headers {"Content-Type" "text/html"}
+     :body (views/dashboard)})

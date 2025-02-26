@@ -1,0 +1,156 @@
+* {
+    padding: 0;
+    margin: 0;
+}
+
+body {
+    font-family: 'Montserrat', sans-serif;
+}
+
+.login-page {
+    background-size: cover;
+    background-repeat: no-repeat;
+    overflow: hidden;
+    background-position: center; 
+    backdrop-filter: blur(2px);
+}
+
+
+.welcome {
+    color: white;
+    text-align: center;
+    border-radius: 25px;
+    backdrop-filter: blur(3px);
+    text-shadow: 2px 2px 4px #000000;
+    box-shadow: 0 4px 8px 0 rgba(255, 255, 255, 0.226), 0 6px 20px 0 rgba(255, 255, 255, 0.226);
+    padding: 10px;
+}
+
+.welcome h1 {
+    font-size: 4em;
+    font-weight: 750;
+}
+
+.welcome h3 {
+    font-size: 2em;
+    font-style: oblique;
+    color: #91DC47;
+}
+
+.sign-div {
+    background-color: white; 
+    border-radius: 25px 0 0 25px;
+    font-size: 2em;
+}
+
+.sign-title {
+    color: #f87f74;
+    font-weight: 750;
+}
+
+form {
+    font-size: 20px;
+}
+
+input {
+    text-indent: 25px; 
+}
+
+.input-group {
+    margin: 20px 0;
+    position: relative;
+    display: inline-block;
+}
+
+.input-group label {
+    position: absolute;
+    transform: translateY(-50%);
+    top: 50%;
+    left: 40px;
+    font-size: 16px;
+    pointer-events: none;
+    color: rgb(155, 155, 155);
+    padding: 0 5px;
+    transition: .5s;
+}
+
+.input-group input {
+    width: 360px;
+    height: 60px;
+    font-size: 16px;
+    padding: 0 15px;
+    border: 1.2px solid rgb(155, 155, 155);
+    background: transparent;
+    outline: none;
+    border-radius: 5px;
+}
+
+.input-group input:focus {
+    border: 1.2px solid #f87f74;
+}
+
+.input-group input:focus~label,
+.input-group input:valid~label {
+    top: 0;
+    background: #f87f74;
+    font-size: 14px;
+    border-radius: 5px;
+    color: white;
+}
+
+.email-icon::before,
+.password-icon::before {
+    content: "";
+    display: inline-block;
+    width: 20px;  /* Adjust the width */
+    height: 20px; /* Adjust the height */
+    background-size: contain;
+    background-repeat: no-repeat;
+    margin-top: 10px;
+    position: absolute;
+}
+
+.email-icon::before {
+    content: url('../img/account-icon.png');
+    transform: scale(0.3);
+}
+
+.password-icon::before {
+    content: url('../img/password-icon.png');
+    transform: scale(0.3);
+}
+
+button {
+    background-color: #000123;
+    border: solid #000123;
+    color: white;
+    padding: 15px 32px;
+    margin-top: 10%;
+    width: 50%;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    border-radius: 10px;
+    transition-duration: 0.4s;
+}
+
+button:hover {
+    background-color: white;
+    color: #000123;
+  }
+
+.switch-sign {
+    margin-top: 5%;
+    font-size: 12px;
+}
+
+.sign-text {
+    font-weight: bold;
+    transition-duration: 0.4s;
+}
+
+.sign-text:hover{
+    color: #f87f74;
+    text-decoration: none;
+}
