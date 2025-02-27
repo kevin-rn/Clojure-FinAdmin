@@ -140,6 +140,11 @@ button:hover {
     color: #000123;
   }
 
+button:active, button:focus {
+    background-color: #f87f74;
+    color: white;
+}
+
 .switch-sign {
     margin-top: 5%;
     font-size: 12px;
@@ -153,4 +158,43 @@ button:hover {
 .sign-text:hover{
     color: #f87f74;
     text-decoration: none;
+}
+
+
+.sidebar {
+    background-color: #000123;
+    height: 100vh;
+    position: fixed
+}
+
+.sidebar ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    width: 25%;
+    position: fixed;
+    height: 100%;
+    overflow: auto;
+}
+
+.sidebar li a {
+    display: block;
+    padding: 8px 16px;
+    text-decoration: none;
+}
+
+.sidebar li a.active {
+    background-color: #04AA6D;
+    color: white;
+  }
+  
+.sidebar li a:hover:not(.active) {
+    background-color: #555;
+    color: white;
+  }
+
+.logo {
+    position: relative;
+    width: 100px;
+    height: 100px;
 }
