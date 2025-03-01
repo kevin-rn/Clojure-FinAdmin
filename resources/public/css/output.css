@@ -20,6 +20,9 @@
 .inline-block {
   display: inline-block;
 }
+.table {
+  display: table;
+}
 .h-screen {
   height: 100vh;
 }

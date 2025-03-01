@@ -5,5 +5,5 @@
    [ring.middleware.reload :refer [wrap-reload]]))
 
 (defn -main []
-  (println "Server started on port 3000: http://localhost:3000/")
   (run-jetty (wrap-reload app) {:port 3000, :join? false}))
+  (println "Server started on port 3000: http://localhost:3000/")
