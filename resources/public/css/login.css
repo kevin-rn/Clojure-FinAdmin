@@ -1,3 +1,12 @@
+:root {
+    --base-clr: #000123;
+    --accent-clr: #f87f74;
+    --primary-txt-clr: #ffffff;
+    --border-clr: #9b9b9b;
+    --box-shadow-clr: #ffffff3a;
+    --txt-shadow-clr: #000000;
+}
+
 * {
     padding: 0;
     margin: 0;
@@ -5,6 +14,8 @@
 
 body {
     font-family: 'Montserrat', sans-serif;
+    height: 100vh;
+    width: 100vw;
 }
 
 .login-page {
@@ -17,12 +28,12 @@ body {
 
 
 .welcome {
-    color: white;
+    color: var(--primary-txt-clr);
     text-align: center;
     border-radius: 25px;
     backdrop-filter: blur(3px);
-    text-shadow: 2px 2px 4px #000000;
-    box-shadow: 0 4px 8px 0 rgba(255, 255, 255, 0.226), 0 6px 20px 0 rgba(255, 255, 255, 0.226);
+    text-shadow: 2px 2px 4px var(--txt-shadow-clr);
+    box-shadow: 0 4px 8px 0 var(--box-shadow-clr), 0 6px 20px 0 var(--box-shadow-clr);
     padding: 10px;
 }
 
@@ -38,13 +49,13 @@ body {
 }
 
 .sign-div {
-    background-color: white; 
+    background-color: var(--primary-txt-clr); 
     border-radius: 25px 0 0 25px;
     font-size: 2em;
 }
 
 .sign-title {
-    color: #f87f74;
+    color: var(--accent-clr);
     font-weight: 750;
 }
 
@@ -69,7 +80,7 @@ input {
     left: 40px;
     font-size: 16px;
     pointer-events: none;
-    color: rgb(155, 155, 155);
+    color: var(--border-clr);
     padding: 0 5px;
     transition: .5s;
 }
@@ -79,23 +90,23 @@ input {
     height: 60px;
     font-size: 16px;
     padding: 0 15px;
-    border: 1.2px solid rgb(155, 155, 155);
+    border: 1.2px solid var(--border-clr);
     background: transparent;
     outline: none;
     border-radius: 5px;
 }
 
 .input-group input:focus {
-    border: 1.2px solid #f87f74;
+    border: 1.2px solid var(--accent-clr);
 }
 
 .input-group input:focus~label,
 .input-group input:valid~label {
     top: 0;
-    background: #f87f74;
+    background: var(--accent-clr);
     font-size: 14px;
     border-radius: 5px;
-    color: white;
+    color: var(--primary-txt-clr);
 }
 
 .email-icon::before,
@@ -120,10 +131,10 @@ input {
     transform: scale(0.3);
 }
 
-button {
-    background-color: #000123;
-    border: solid #000123;
-    color: white;
+.sign button {
+    background-color: var(--base-clr);
+    border: solid var(--base-clr);
+    color: var(--primary-txt-clr);
     padding: 15px 32px;
     margin-top: 10%;
     width: 50%;
@@ -135,14 +146,14 @@ button {
     transition-duration: 0.4s;
 }
 
-button:hover {
-    background-color: white;
-    color: #000123;
+.sign button:hover {
+    background-color: var(--primary-txt-clr);
+    color: var(--base-clr);
   }
 
-button:active, button:focus {
-    background-color: #f87f74;
-    color: white;
+  .sign button:active, .sign button:focus {
+    background-color: var(--accent-clr);
+    color: var(--primary-txt-clr);
 }
 
 .switch-sign {
@@ -156,44 +167,6 @@ button:active, button:focus {
 }
 
 .sign-text:hover{
-    color: #f87f74;
+    color: var(--accent-clr);
     text-decoration: none;
-}
-
-
-.sidebar {
-    background-color: #000123;
-    height: 100vh;
-    position: fixed
-}
-
-.sidebar ul {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    position: fixed;
-    height: 100%;
-    overflow: auto;
-}
-
-.sidebar li a {
-    display: block;
-    padding: 8px 16px;
-    text-decoration: none;
-}
-
-.sidebar li a.active {
-    background-color: #04AA6D;
-    color: white;
-  }
-  
-.sidebar li a:hover:not(.active) {
-    background-color: #555;
-    color: white;
-  }
-
-.logo {
-    position: relative;
-    width: 100px;
-    height: 100px;
 }

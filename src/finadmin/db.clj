@@ -1,5 +1,6 @@
 (ns finadmin.db
   (:require
+   [buddy.hashers :as hashers]
    [next.jdbc :as jdbc]
    [next.jdbc.connection :as connection]) 
   (:import
@@ -19,6 +20,11 @@
 (defn get-conn []
   {:datasource datasource})
 
+(defn email-exists? [email]
+  (let [result (jdbc/execute! (get-conn) ["SELECT COUNT(1) FROM accounts WHERE email = ?" email])]
+    (> (get (first result) :count) 0)))
 
-(defn get-users []
-  (jdbc/execute! (get-conn) ["SELECT * FROM accounts"]))
+(defn create-user! [email password]
+  (let [hashed-password (hashers/derive password)]
+    (jdbc/execute! (get-conn)
+                   ["INSERT INTO accounts (email, password) VALUES (?, ?)" email hashed-password])))

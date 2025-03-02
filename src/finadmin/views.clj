@@ -15,7 +15,7 @@
              [:span {:class "password-icon"}]
              [:input {:type "password" :required true}]
              [:label {:for ""} "Password"]]
-            [:button {:type "submit" :hx-post "/sign-in" :hx-target "this"} "Sign In"]
+            [:button {:type "submit" :hx-post "/sign-in" :hx-target "this" :class "sign"} "Sign In"]
 
             [:div {:class "text-center switch-sign"}
              [:span "Don't have an account? "]
@@ -37,7 +37,7 @@
              [:span {:class "password-icon"}]
              [:input {:type "password" :required true}]
              [:label "Repeat Password"]]
-            [:button {:type "submit"} "Sign Up"]
+            [:button {:type "submit" :class "sign"} "Sign Up"]
 
             [:div {:class "text-center switch-sign"}
              [:span "Already have an account? "]
@@ -51,7 +51,7 @@
          [:head
           [:title "Clojure FinAdmin"]
           (include-css "/css/output.css")
-          (include-css "/css/style.css")
+          (include-css "/css/login.css")
           (include-js "https://unpkg.com/htmx.org@2.0.4")
           [:link {:href "https://fonts.googleapis.com/css?family=Montserrat:400,900" :rel "stylesheet"}]
           [:link {:rel "icon" :href "/favicon.ico" :type "image/x-icon"}]]
@@ -64,6 +64,15 @@
            [:div {:id "auth-container" :class "w-1/3 flex items-center justify-center sign-div"} 
             (sign-in)]]]])))
 
+(defn sign-up-error [error-message]
+  (h/html [:div {:id "auth-container" :class "w-full text-center"}
+           [:h3 "Sign Up Failed"]
+           [:p {:class "text-red-500"} error-message]  ;; Display the error message in red
+           [:a {:href "#" :class "sign-text" :hx-get "/sign-up" :hx-target "#auth-container"} "Try Again"]  ;; Option to try again
+           [:div {:class "text-center switch-sign"}
+            [:span "Already have an account? "]
+            [:a {:href "#" :class "sign-text" :hx-get "/sign-in" :hx-target "#auth-container"} "Sign In"]]]))
+
 (defn dashboard []
   (str "<!DOCTYPE html>"
        (h/html
@@ -71,23 +80,50 @@
          [:head
           [:title "Clojure FinAdmin"]
           (include-css "/css/output.css")
-          (include-css "/css/style.css")
+          (include-css "/css/dashboard.css")
           (include-js "https://unpkg.com/htmx.org@2.0.4")
+          [:script {:src "/js/app.js" :defer true}]
           [:link {:href "https://fonts.googleapis.com/css?family=Montserrat:400,900" :rel "stylesheet"}]
           [:link {:rel "icon" :href "/favicon.ico" :type "image/x-icon"}]]
          [:body
-          [:div {:class "flex h-screen"}
-           [:div {:class "w-1/4 sidebar" :style {:color "white"}}
-            [:div {:class "flex flex-col logo"}]
-            [:div {:class "flex flex-col"}
-             [:ul
-              [:li [:a "Dashboard"]]
-              [:li [:a "Invoices"]]
-              [:li [:a "Expenses"]]
-              [:li [:a "Banking"]]
-              [:li [:a "Settings"]]
-              [:li [:a "Log out"]]]]]
+          [:header             
+           [:img {:src "logo.png" :alt "Logo" :class "logo"}] 
+           [:p "Financial Administration"]]
+          [:nav {:id "sidebar" :class "flex"}
+           [:ul
+            [:li
+             [:button {:id "toggle-btn" :onclick "toggleSidebar()"}
+              [:img {:src "/icons/toggle.svg" :alt "Toggle button"}]]]
+            [:li {:class "active"} [:a
+                                    [:img {:src "/icons/dashboard.svg" :alt "Dashboard Icon"}]
+                                    [:span "Dashboard"]]]
+            [:li [:a
+                  [:img {:src "/icons/forms.svg" :alt "Forms Icon"}]
+                  [:span "Forms"]]]
+            [:li
+             [:button {:class "dropdown-btn" :onclick "toggleSubMenu(this)"}
+              [:img {:src "/icons/bookkeeping.svg" :alt "Bookkeeping"}]
+              [:span "Bookkeeping"]
+              [:img {:src "/icons/dropdown.svg" :alt "Dropdown Menu"}]]
+             [:ul {:class "sub-menu"}
+              [:div
+               [:li [:a
+                     [:img {:src "/icons/balance.svg" :alt "Account Balance Icon"}]
+                     [:span "Account Balance"]]]
+               [:li [:a
+                     [:img {:src "/icons/expenses.svg" :alt "Expenses Icon"}]
+                     [:span "Expenses"]]]
+               [:li [:a
+                     [:img {:src "/icons/invoices.svg" :alt "Invoices Icon"}]
+                     [:span "Invoices"]]]]]]
+            [:li [:a
+                  [:img {:src "/icons/settings.svg" :alt "Settings Icon"}]
+                  [:span "Settings"]]]
+            [:li [:a
+                  [:img {:src "/icons/support.svg" :alt "Support Icon"}]
+                  [:span "Support"]]]
+            [:li [:a
+                  [:img {:src "/icons/logout.svg" :alt "Log out Icon"}]
+                  [:span "Log out"]]]]]
 
-           [:div {:class "w-3/4 flex items-center justify-center"}]]
-          
-          ]])))
+          [:main {:class "flex items-center justify-center"}]]])))

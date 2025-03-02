@@ -14,3 +14,6 @@ CREATE TABLE session_store
     absolute_timeout BIGINT,
     value BYTEA
 );
+
+INSERT INTO accounts (email, password)
+VALUES ('test@example.com', 'password123');
