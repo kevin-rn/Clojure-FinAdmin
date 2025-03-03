@@ -37,6 +37,41 @@ body {
     padding: 10px;
 }
 
+/* @property --angle{
+    syntax: "<angle>";
+    initial-value: 0deg;
+    inherits: false;
+} */
+
+/* .welcome::after, .welcome::before{
+    content: '';
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    background-image: conic-gradient(from var(--angle), #ff4545, #00ff99, #006aff, #ff0095, #ff4545);
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
+    z-index: -99;
+    padding: 3px;
+    border-radius: 10px;
+    animation: 3s spin linear infinite;
+} */
+
+/* .welcome::before{
+    filter: blur(1.5rem);
+    opacity: 0.5;
+} */
+
+/* @keyframes spin{
+    from{
+        --angle: 0deg;
+    }
+    to{
+        --angle: 360deg;
+    }
+} */
+
 .welcome h1 {
     font-size: 4em;
     font-weight: 750;
@@ -113,8 +148,8 @@ input {
 .password-icon::before {
     content: "";
     display: inline-block;
-    width: 20px;  /* Adjust the width */
-    height: 20px; /* Adjust the height */
+    width: 20px;
+    height: 20px;
     background-size: contain;
     background-repeat: no-repeat;
     margin-top: 10px;
@@ -131,7 +166,7 @@ input {
     transform: scale(0.3);
 }
 
-.sign button {
+button {
     background-color: var(--base-clr);
     border: solid var(--base-clr);
     color: var(--primary-txt-clr);
@@ -146,12 +181,12 @@ input {
     transition-duration: 0.4s;
 }
 
-.sign button:hover {
+button:hover {
     background-color: var(--primary-txt-clr);
     color: var(--base-clr);
-  }
+}
 
-  .sign button:active, .sign button:focus {
+button:active, button:focus {
     background-color: var(--accent-clr);
     color: var(--primary-txt-clr);
 }

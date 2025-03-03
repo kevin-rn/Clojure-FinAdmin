@@ -15,5 +15,4 @@ CREATE TABLE session_store
     value BYTEA
 );
 
-INSERT INTO accounts (email, password)
-VALUES ('test@example.com', 'password123');
+-- ALTER ROLE postgres WITH PASSWORD 'postgres';
