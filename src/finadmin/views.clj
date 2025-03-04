@@ -4,10 +4,15 @@
    [hiccup2.core :as h]
    [ring.util.anti-forgery :refer [anti-forgery-field]]))
 
-(defn sign-in []
+(defn sign-in 
+  [{:keys [error]}]
   (h/html [:div {:id "sign-in" :class "w-full"}
-           [:h1 {:class "text-center sign-title"} "Sign In"]
+           [:h1 {:class "text-center sign-title"} "Sign In"] 
            [:form {:class "flex flex-col items-center"}
+            (when error
+              [:div {:class "error-message flex items-center"}
+               [:img {:src "/icons/error.svg" :alt "Error message"}]
+               [:p error]])
             (h/raw (anti-forgery-field))
             [:div {:class "input-group"}
              [:span {:class "email-icon"}]
@@ -17,16 +22,21 @@
              [:span {:class "password-icon"}]
              [:input {:type "password" :name "password" :required true}]
              [:label {:for ""} "Password"]]
-            [:button {:type "submit" :hx-post "/sign-in" :hx-target "this"} "Sign In"]
+            [:button {:type "submit" :hx-post "/sign-in" :hx-target "#sign-in" :hx-swap "outerHTML"} "Sign In"]
 
             [:div {:class "text-center switch-sign"}
              [:span "Don't have an account? "]
              [:a {:href "#" :class "sign-text" :hx-get "/sign-up" :hx-target "#auth-container"} "Sign Up"]]]]))
 
-(defn sign-up []
+(defn sign-up 
+  [{:keys [error]}]
   (h/html [:div {:id "sign-up" :class "w-full"}
-           [:h1 {:class "text-center sign-title"} "Sign Up"]
+           [:h1 {:class "text-center sign-title"} "Sign Up"] 
            [:form {:class "flex flex-col items-center"}
+            (when error
+              [:div {:class "error-message"}
+               [:img {:src "/icons/error.svg" :alt "Error message"}]
+               [:p error]])
             (h/raw (anti-forgery-field))
             [:div {:class "input-group"}
              [:span {:class "email-icon"}]
@@ -40,14 +50,15 @@
              [:span {:class "password-icon"}]
              [:input {:type "password" :name "repeat-password" :required true}]
              [:label "Repeat Password"]]
-            [:button {:type "submit" :hx-post "/sign-up" :hx-target "this"} "Sign Up"]
+            [:button {:type "submit" :hx-post "/sign-up" :hx-target "#sign-up" :hx-swap "OuterHTML"} "Sign Up"]
 
             [:div {:class "text-center switch-sign"}
              [:span "Already have an account? "]
              [:a {:href "#" :class "sign-text" :hx-get "/sign-in" :hx-target "#auth-container"} "Sign In"]]]]))
 
 
-(defn login []
+(defn login 
+  []
   (str "<!DOCTYPE html>"
        (h/html
         [:html
@@ -65,27 +76,10 @@
              [:h1 "Start your Financial Administration here!"]
              [:h3 "Built with Clojure"]]]
            [:div {:id "auth-container" :class "w-1/3 flex items-center justify-center sign-div"}
-            (sign-in)]]]])))
+            (sign-in {})]]]])))
 
-(defn sign-up-error [error-message]
-  (h/html [:div {:id "auth-container" :class "w-full text-center"}
-           [:h3 "Sign Up Failed"]
-           [:p {:class "text-red-500"} error-message]  ;; Display the error message in red
-           [:a {:href "#" :class "sign-text" :hx-get "/sign-up" :hx-target "#auth-container"} "Try Again"]  ;; Option to try again
-           [:div {:class "text-center switch-sign"}
-            [:span "Already have an account? "]
-            [:a {:href "#" :class "sign-text" :hx-get "/sign-in" :hx-target "#auth-container"} "Sign In"]]]))
-
-(defn sign-in-error [error-message]
-  (h/html [:div {:id "auth-container" :class "w-full text-center"}
-           [:h3 "Sign In Failed"]
-           [:p {:class "text-red-500"} error-message]  ;; Display the error message in red
-           [:a {:href "#" :class "sign-text" :hx-get "/sign-up" :hx-target "#auth-container"} "Try Again"]  ;; Option to try again
-           [:div {:class "text-center switch-sign"}
-            [:span "Already have an account? "]
-            [:a {:href "#" :class "sign-text" :hx-get "/sign-in" :hx-target "#auth-container"} "Sign In"]]]))
-
-(defn dashboard [email]
+(defn dashboard 
+  [email]
   (let [email (if (nil? email) "Guest" email)]
     (str "<!DOCTYPE html>"
          (h/html
@@ -97,10 +91,10 @@
             (include-js "https://unpkg.com/htmx.org@2.0.4")
             [:script {:src "/js/app.js" :defer true}]
             [:link {:href "https://fonts.googleapis.com/css?family=Montserrat:400,900" :rel "stylesheet"}]
-            [:link {:rel "icon" :href "/favicon.ico" :type "image/x-icon"}]]
+            [:link {:rel "icon" :href "/logo/favicon.ico" :type "image/x-icon"}]]
            [:body
             [:header
-             [:img {:src "logo.png" :alt "Logo" :class "logo"}]
+             [:img {:src "/logo/logo.png" :alt "Logo" :class "logo"}]
              [:p "Financial Administration"]
              [:p email]]
 

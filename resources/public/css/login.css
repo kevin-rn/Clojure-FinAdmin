@@ -5,6 +5,8 @@
     --border-clr: #9b9b9b;
     --box-shadow-clr: #ffffff3a;
     --txt-shadow-clr: #000000;
+    --error-clr: #fedce0;
+    --error-border-clr: #f76e80;
 }
 
 * {
@@ -204,4 +206,26 @@ button:active, button:focus {
 .sign-text:hover{
     color: var(--accent-clr);
     text-decoration: none;
+}
+
+.error-message {
+    margin-top: 10px;
+    border-radius: 10px;
+    padding: 10px;
+    width: 50%;
+    height: auto;
+    background-color: var(--error-clr);
+    border: 1px solid var(--error-border-clr); 
+    > p {
+        font-size: 14px;
+        text-align: left;
+        margin-left: 5px;
+        color: var(--error-border-clr);
+        font-weight: 600;
+    }
+
+    > img {
+        flex-shrink: 0;
+        filter: invert(59%) sepia(10%) saturate(7422%) hue-rotate(313deg) brightness(104%) contrast(94%);
+    }
 }
