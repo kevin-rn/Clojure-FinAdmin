@@ -47,6 +47,10 @@ header {
     
 }
 
+main {
+    flex-grow: 1;
+}
+
 #sidebar {
     box-sizing: border-box;
     height: 95vh;
@@ -61,6 +65,7 @@ header {
     transition: 300ms ease-in-out;
     overflow: hidden;
     text-wrap: nowrap;
+    z-index: 1;
 }
 
 #sidebar.close {
@@ -162,4 +167,14 @@ header {
 
 #toggle-btn:hover {
     background-color: var(--secondary-txt-clr);
+}
+
+#dashboard-content {
+    > div {
+        margin-bottom: 20px;
+    }
+
+    > p {
+        margin-bottom: 5px;
+    }
 }

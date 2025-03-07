@@ -68,7 +68,7 @@
           (include-css "/css/login.css")
           (include-js "https://unpkg.com/htmx.org@2.0.4")
           [:link {:href "https://fonts.googleapis.com/css?family=Montserrat:400,900" :rel "stylesheet"}]
-          [:link {:rel "icon" :href "/favicon.ico" :type "image/x-icon"}]]
+          [:link {:rel "icon" :href "/logo/favicon.ico" :type "image/x-icon"}]]
          [:body {:class "bg-[url(../img/login-background.png)] login-page"}
           [:div {:class "flex h-screen"}
            [:div {:class "w-2/3 flex items-center justify-center"}
@@ -78,61 +78,115 @@
            [:div {:id "auth-container" :class "w-1/3 flex items-center justify-center sign-div"}
             (sign-in {})]]]])))
 
-(defn dashboard 
+(defn overview-component
+  [])
+
+(defn forms-component
+  [])
+
+(defn transactions-component
+  [])
+
+(defn invoices-component
+  [])
+
+(defn expenses-component
+  [])
+
+(defn settings-component
+  []
+  (h/html
+   [:div 
+    [:h2 "Profile Settings"]
+    [:ul
+     [:li 
+      [:p "email" ]
+      [:span ""]]
+     [:li 
+      [:p "Password"]]]]
+   
+   [:div 
+    [:h2 "Update Password"]
+    [:form
+     [:input]]]
+   
+   [:button "Delete Account"]
+   )
+)
+
+(defn support-component
+  []
+  (h/html
+   [:div
+    [:h2 "Frequently Asked Questions"]
+    [:ul
+     [:li [:strong "How do I reset my password?"] [:p "Go to your profile settings, and click on 'Reset Password'. Follow the steps to update your password."]]
+     [:li [:strong "Will this webapp have more features?"] [:p "For now not no."]]]]
+
+   [:div
+    [:h2 "Feedback"]
+    [:p "We value your feedback. Please let us know how we can improve."]
+    [:textarea {:placeholder "Your feedback..." :rows "4" :cols "50"}]
+    [:button "Submit Feedback"]])
+   )
+
+(defn dashboard
   [email]
-  (let [email (if (nil? email) "Guest" email)]
-    (str "<!DOCTYPE html>"
-         (h/html
-          [:html
-           [:head
-            [:title "Clojure FinAdmin"]
-            (include-css "/css/output.css")
-            (include-css "/css/dashboard.css")
-            (include-js "https://unpkg.com/htmx.org@2.0.4")
-            [:script {:src "/js/app.js" :defer true}]
-            [:link {:href "https://fonts.googleapis.com/css?family=Montserrat:400,900" :rel "stylesheet"}]
-            [:link {:rel "icon" :href "/logo/favicon.ico" :type "image/x-icon"}]]
-           [:body
-            [:header
-             [:img {:src "/logo/logo.png" :alt "Logo" :class "logo"}]
-             [:p "Financial Administration"]
-             [:p email]]
+  (str "<!DOCTYPE html>"
+       (h/html
+        [:html
+         [:head
+          [:title "Clojure FinAdmin"]
+          (include-css "/css/output.css")
+          (include-css "/css/dashboard.css")
+          (include-js "https://unpkg.com/htmx.org@2.0.4")
+          [:script {:src "/js/app.js" :defer true}]
+          [:link {:href "https://fonts.googleapis.com/css?family=Montserrat:400,900" :rel "stylesheet"}]
+          [:link {:rel "icon" :href "/logo/favicon.ico" :type "image/x-icon"}]]
+         [:body
+          [:header
+           [:img {:src "/logo/logo.png" :alt "Logo" :class "logo"}]
+           [:p "Financial Administration"]
+           [:p email]]
 
-            [:nav {:id "sidebar" :class "flex"}
-             [:ul
-              [:li
-               [:button {:id "toggle-btn" :onclick "toggleSidebar()"}
-                [:img {:src "/icons/toggle.svg" :alt "Toggle button"}]]]
-              [:li {:class "active"} [:a
-                                      [:img {:src "/icons/dashboard.svg" :alt "Dashboard Icon"}]
-                                      [:span "Dashboard"]]]
-              [:li [:a
-                    [:img {:src "/icons/forms.svg" :alt "Forms Icon"}]
-                    [:span "Forms"]]]
-              [:li
-               [:button {:class "dropdown-btn" :onclick "toggleSubMenu(this)"}
-                [:img {:src "/icons/bookkeeping.svg" :alt "Bookkeeping"}]
-                [:span "Bookkeeping"]
-                [:img {:src "/icons/dropdown.svg" :alt "Dropdown Menu"}]]
-               [:ul {:class "sub-menu"}
-                [:div
-                 [:li [:a
-                       [:img {:src "/icons/balance.svg" :alt "Account Balance Icon"}]
-                       [:span "Account Balance"]]]
-                 [:li [:a
-                       [:img {:src "/icons/expenses.svg" :alt "Expenses Icon"}]
-                       [:span "Expenses"]]]
-                 [:li [:a
-                       [:img {:src "/icons/invoices.svg" :alt "Invoices Icon"}]
-                       [:span "Invoices"]]]]]]
-              [:li [:a
-                    [:img {:src "/icons/settings.svg" :alt "Settings Icon"}]
-                    [:span "Settings"]]]
-              [:li [:a
-                    [:img {:src "/icons/support.svg" :alt "Support Icon"}]
-                    [:span "Support"]]]
-              [:li [:a {:href "/" :hx-get "/logout" :hx-target "this"}
-                    [:img {:src "/icons/logout.svg" :alt "Log out Icon"}]
-                    [:span "Log out"]]]]]
+          [:div {:class "flex"}
+           [:nav {:id "sidebar" :class "flex"}
+            [:ul
+             [:li
+              [:button {:id "toggle-btn" :onclick "toggleSidebar()"}
+               [:img {:src "/icons/toggle.svg" :alt "Toggle button"}]]]
+             [:li {:class "active"} [:a {:href "" :hx-get "/overview" :hx-target "#dashboard-content"}
+                                     [:img {:src "/icons/dashboard.svg" :alt "Dashboard Icon"}]
+                                     [:span "Overview"]]]
+             [:li [:a {:href "" :hx-get "/forms" :hx-target "#dashboard-content"}
+                   [:img {:src "/icons/forms.svg" :alt "Forms Icon"}]
+                   [:span "Forms"]]]
+             [:li
+              [:button {:class "dropdown-btn" :onclick "toggleSubMenu(this)"}
+               [:img {:src "/icons/bookkeeping.svg" :alt "Bookkeeping"}]
+               [:span "Bookkeeping"]
+               [:img {:src "/icons/dropdown.svg" :alt "Dropdown Menu"}]]
+              [:ul {:class "sub-menu"}
+               [:div
+                [:li [:a {:href "" :hx-get "/transactions" :hx-target "#dashboard-content"}
+                      [:img {:src "/icons/balance.svg" :alt "Transactions Icon"}]
+                      [:span "Transaction History"]]]
+                [:li [:a {:href "" :hx-get "/expenses" :hx-target "#dashboard-content"}
+                      [:img {:src "/icons/expenses.svg" :alt "Expenses Icon"}]
+                      [:span "Expenses"]]]
+                [:li [:a {:href "" :hx-get "/invoices" :hx-target "#dashboard-content"}
+                      [:img {:src "/icons/invoices.svg" :alt "Invoices Icon"}]
+                      [:span "Invoices"]]]]]]
+             [:li [:a {:href "" :hx-get "/settings" :hx-target "#dashboard-content"}
+                   [:img {:src "/icons/settings.svg" :alt "Settings Icon"}]
+                   [:span "Settings"]]]
+             [:li [:a {:href "" :hx-get "/support" :hx-target "#dashboard-content"}
+                   [:img {:src "/icons/support.svg" :alt "Support Icon"}]
+                   [:span "Support"]]]
+             [:li [:a {:href "/" :hx-get "/logout" :hx-target "this"}
+                   [:img {:src "/icons/logout.svg" :alt "Log out Icon"}]
+                   [:span "Log out"]]]]]
 
-            [:main {:class "flex items-center justify-center"}]]]))))
+           [:main {:class "flex items-center justify-center"}
+            [:div {:id "dashboard-content" :class "overflow-y-auto"}
+             (overview-component)]]]]])))

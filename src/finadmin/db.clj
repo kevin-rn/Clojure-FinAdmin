@@ -26,7 +26,7 @@
 
 (def database-connection {:datasource @datasource})
 
-(defn create-user! 
+(defn create-user!
   "Creates user account in database with secure hashing.
           
       Parameters:
@@ -34,30 +34,30 @@
       - password: A string representing the user's entered password.
           
       Returns:
-      - false if email is nil else executes database query for account creation" 
+      - false if email is nil else executes database query for account creation"
   [email password]
   (if (nil? email)
     false
     (let [hashed-password (hashers/derive password {:alg :pbkdf2+sha256})]
-      (jdbc/execute! database-connection
-                     ["INSERT INTO accounts (email, password) VALUES (?, ?)" email hashed-password]))))
+      (jdbc/execute-one! database-connection
+                         ["INSERT INTO accounts (email, password) VALUES (?, ?)" email hashed-password]))))
 
-  (defn email-exists? 
-    "Verifies if the given email match an existing account.
+(defn email-exists?
+  "Verifies if the given email match an existing account.
         
            Parameters:
            - email: A string representing the user's email.
         
            Returns:
            - boolean indicating true if email matches that of existing account or else false."
-    [email]
-    (if (nil? email)
-      false
-      (let [result (jdbc/execute! database-connection ["SELECT COUNT(1) FROM accounts WHERE email = ?" email])]
-        (> (get (first result) :count) 0))))
+  [email]
+  (if (nil? email)
+    false
+    (let [result (jdbc/execute! database-connection ["SELECT COUNT(1) FROM accounts WHERE email = ?" email])]
+      (> (get (first result) :count) 0))))
 
-  (defn verify-account? 
-    "Verifies if the given email and password match an existing account.
+(defn verify-account?
+  "Verifies if the given email and password match an existing account.
     
        Parameters:
        - email: A string representing the user's email.
@@ -66,10 +66,8 @@
        Returns:
        - boolean indicating true if the password matches the stored hash 
          otherwise false if the email is not found or the password is incorrect."
-    [email password]
-    (let [query "SELECT password FROM accounts WHERE email = ? LIMIT 1"
-          result (jdbc/execute! database-connection [query email])]
-      (if (seq result)
-        (let [stored-hash (get-in (first result) [:accounts/password])]
-          (hashers/verify password stored-hash {:alg :pbkdf2+sha256}))
-        false)))
+  [email password]
+  (let [query "SELECT password FROM accounts WHERE email = ?"
+        result (jdbc/execute-one! database-connection [query email])]
+    (when-let [stored-hash (:accounts/password result)]
+      (:valid (hashers/verify password stored-hash {:alg :pbkdf2+sha256})))))

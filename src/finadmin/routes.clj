@@ -11,7 +11,14 @@
         [["/" {:get handlers/login-page}]
          ["/sign-in" {:get handlers/sign-in-page :post handlers/sign-in-account}]
          ["/sign-up" {:get handlers/sign-up-page :post handlers/sign-up-account}]
-         ["/dashboard" {:get handlers/dashboard-page}]
-         ["/logout" {:get handlers/logout-page}]]))
+         ["/dashboard" {:get handlers/dashboard-page}] 
+         ["/overview" {:get handlers/overview}]
+         ["/forms" {:get handlers/forms}]
+         ["/transactions" {:get handlers/transactions}]
+         ["/invoices" {:get handlers/invoices}]
+         ["/expenses" {:get handlers/expenses}]
+         ["/support" {:get handlers/support}]
+         ["/settings" {:get handlers/settings}]
+         ["/logout" {:get handlers/logout}]]))
       (wrap-defaults (assoc-in site-defaults [:security :anti-forgery] false))
       (wrap-session)))
