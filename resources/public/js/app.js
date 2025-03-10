@@ -1,6 +1,13 @@
 const toggleButton = document.getElementById('toggle-btn')
 const sidebar = document.getElementById('sidebar')
 
+$(document).ready(function () {
+    $("#sidebar a").on("click", function () {
+      $("#sidebar").find(".selected").removeClass("selected");
+      $(this).parent().addClass("selected");
+    });
+  });
+
 function toggleSidebar() {
     sidebar.classList.toggle('close')
     toggleButton.classList.toggle('rotate')

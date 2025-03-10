@@ -116,10 +116,11 @@
    :body (str (views/expenses-component))})
 
 (defn settings
-  [_]
+  [request]
+  (let [{:keys [email]} (get-in request [:session])]
   {:status 200
    :headers {"Content-Type" "text/html"}
-   :body (str (views/settings-component))})
+   :body (str (views/settings-component email))}))
 
 
 (defn support

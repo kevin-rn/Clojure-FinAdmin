@@ -7,6 +7,7 @@
     --txt-shadow-clr: #000000;
     --error-clr: #fedce0;
     --error-border-clr: #f76e80;
+    --filter-color: invert(59%) sepia(10%) saturate(7422%) hue-rotate(313deg) brightness(104%) contrast(94%);
 }
 
 * {
@@ -37,52 +38,20 @@ body {
     text-shadow: 2px 2px 4px var(--txt-shadow-clr);
     box-shadow: 0 4px 8px 0 var(--box-shadow-clr), 0 6px 20px 0 var(--box-shadow-clr);
     padding: 10px;
+    position: relative;
 }
-
-/* @property --angle{
-    syntax: "<angle>";
-    initial-value: 0deg;
-    inherits: false;
-} */
-
-/* .welcome::after, .welcome::before{
-    content: '';
-    position: absolute;
-    height: 100%;
-    width: 100%;
-    background-image: conic-gradient(from var(--angle), #ff4545, #00ff99, #006aff, #ff0095, #ff4545);
-    top: 50%;
-    left: 50%;
-    translate: -50% -50%;
-    z-index: -99;
-    padding: 3px;
-    border-radius: 10px;
-    animation: 3s spin linear infinite;
-} */
-
-/* .welcome::before{
-    filter: blur(1.5rem);
-    opacity: 0.5;
-} */
-
-/* @keyframes spin{
-    from{
-        --angle: 0deg;
-    }
-    to{
-        --angle: 360deg;
-    }
-} */
 
 .welcome h1 {
     font-size: 4em;
     font-weight: 750;
+    z-index: 5;
 }
 
 .welcome h3 {
     font-size: 2em;
     font-style: oblique;
     color: #91DC47;
+    z-index: 5;
 }
 
 .sign-div {
@@ -226,6 +195,6 @@ button:active, button:focus {
 
     > img {
         flex-shrink: 0;
-        filter: invert(59%) sepia(10%) saturate(7422%) hue-rotate(313deg) brightness(104%) contrast(94%);
+        filter: var(--filter-color);
     }
 }
