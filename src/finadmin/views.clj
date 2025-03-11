@@ -4,10 +4,10 @@
    [hiccup2.core :as h]
    [ring.util.anti-forgery :refer [anti-forgery-field]]))
 
-(defn sign-in 
+(defn sign-in
   [{:keys [error]}]
   (h/html [:div {:id "sign-in" :class "w-full"}
-           [:h1 {:class "text-center sign-title"} "Sign In"] 
+           [:h1 {:class "text-center sign-title"} "Sign In"]
            [:form {:class "flex flex-col items-center"}
             (when error
               [:div {:class "error-message flex items-center"}
@@ -28,10 +28,10 @@
              [:span "Don't have an account? "]
              [:a {:href "#" :class "sign-text" :hx-get "/sign-up" :hx-target "#auth-container"} "Sign Up"]]]]))
 
-(defn sign-up 
+(defn sign-up
   [{:keys [error]}]
   (h/html [:div {:id "sign-up" :class "w-full"}
-           [:h1 {:class "text-center sign-title"} "Sign Up"] 
+           [:h1 {:class "text-center sign-title"} "Sign Up"]
            [:form {:class "flex flex-col items-center"}
             (when error
               [:div {:class "error-message"}
@@ -57,7 +57,7 @@
              [:a {:href "#" :class "sign-text" :hx-get "/sign-in" :hx-target "#auth-container"} "Sign In"]]]]))
 
 
-(defn login 
+(defn login
   []
   (str "<!DOCTYPE html>"
        (h/html
@@ -81,8 +81,7 @@
 (defn overview-component
   []
   (h/html
-   [:p "overview"]
-   ))
+   [:p "overview"]))
 
 (defn forms-component
   []
@@ -90,141 +89,206 @@
    [:div
     [:h2 "Upload Forms or Documents"]
     [:button "Upload"]]
-    
+
    [:div
     [:h2 "Documents:"]
     [:ul
-     [:li "Some documents"]]
+     [:li "Some documents"]]]))
 
-    ]))
+
+(defn transactions-list
+  [transactions]
+  (h/html
+   [:table {:class "w-full border-collapse"}
+
+    [:thead {:class "border-b-2 sticky top-0 z-10"}
+     [:tr
+      [:th {:class "p-3 text-sm font-semibold tracking-wide text-left"} "Date"]
+      [:th {:class "p-3 text-sm font-semibold tracking-wide text-left"} "Amount"]
+      [:th {:class "p-3 text-sm font-semibold tracking-wide text-left"} "Currency"]
+      [:th {:class "p-3 text-sm font-semibold tracking-wide text-left"} "Type"]
+      [:th {:class "p-3 text-sm font-semibold tracking-wide text-left"} "Description"]
+      [:th {:class "p-3 text-sm font-semibold tracking-wide text-left"} "Payment method"]]]
+
+    (if (empty? transactions)
+      [:tbody
+       [:tr {:class "text-center"}
+        [:td {:colspan "6" :class "p-3"} [:i {:class "select-none"} "No Transactions stored"]]]]
+      [:tbody
+       (for [{:transactions/keys [transaction_date amount currency transaction_type description payment_method]} transactions]
+         [:tr {:class "border-b"}
+          [:td {:class "p-3"} transaction_date]
+          [:td {:class "p-3"} amount]
+          [:td {:class "p-3"} currency]
+          [:td {:class "p-3"} transaction_type]
+          [:td {:class "p-3"} description]
+          [:td {:class "p-3"} payment_method]])])]))
 
 (defn transactions-component
+  [transactions]
+  (h/html
+   [:div {:id "transactions-container" :class "h-[80vh] flex flex-col"}
+    [:h2 "Transaction History"]
+
+    [:div
+     [:label {:for "transaction-type"} "Transaction Type"]
+     [:select {:name "transaction-type" :hx-get "/filter-transactions" :hx-target "#transaction-list" :hx-trigger "change"}
+      [:option {:value "all"} "All"]
+      [:option {:value "invoice"} "Invoices"]
+      [:option {:value "expense"} "Expenses"]]]
+
+    [:div {:class "flex-1 overflow-auto mt-8" :id "transaction-list"}
+     (transactions-list transactions)]]))
+
+(defn expenses-component
   []
-  (let [transactions (repeat 50 {:date "2024-03-09" :amount "$150.00" :currency "USD" :type "Invoice" :description "Consulting service" :status "Paid"})]
-    (h/html
-     [:div {:id "transactions-container" :class "h-[80vh] flex flex-col"}
-      [:h2 "Transaction History"]
-      
-      [:div
-       [:label {:for "transaction-type"} "Transaction Type"]
-       [:select {:name "transaction-type" :hx-get "/filter-transactions" :hx-target "#transaction-list" :hx-trigger "change"}
-        [:option {:value "all"} "All"]
-        [:option {:value "invoice"} "Invoices"]
-        [:option {:value "expense"} "Expenses"]]]
+  (h/html
+   [:div {:id "expense-form"}
+    [:h2 "Add Expense"]
+    [:form {:class "grid grid-cols-3 gap-4"
+            :hx-post "/add-expense"}
 
-      [:div {:class "flex-1 overflow-auto mt-8"}
-       [:table {:class "w-full border-collapse"}
+     ;; Expense Details
+     [:fieldset {:class "col-span-3 border p-4 rounded"}
+      [:legend "Expense Details"]
+      [:div {:class "grid grid-cols-3 gap-4"}
+       [:div {:class "input-group"}
+        [:label "Transaction Date:"]
+        [:input {:type "date" :name "transaction_date" :required true}]]
+       [:div {:class "input-group"}
+        [:label "Amount:"]
+        [:input {:type "number" :name "amount" :step "0.01" :min "0" :required true}]]
+       [:div {:class "input-group"}
+        [:label "Currency:"]
+        [:input {:type "text" :name "currency" :required true :value "EUR" :maxlength "3" :autocapitalize "characters"}]]
+       [:div {:class "input-group col-span-3"}
+        [:label "Description:"]
+        [:textarea {:name "description" :class "w-full h-48 resize-none"}]]]]
 
-        [:thead {:class "border-b-2 sticky top-0 z-10"}
-         [:tr
-          [:th {:class "p-3 text-sm font-semibold tracking-wide text-left"} "Date"]
-          [:th {:class "p-3 text-sm font-semibold tracking-wide text-left"} "Amount"]
-          [:th {:class "p-3 text-sm font-semibold tracking-wide text-left"} "Currency"]
-          [:th {:class "p-3 text-sm font-semibold tracking-wide text-left"} "Type"]
-          [:th {:class "p-3 text-sm font-semibold tracking-wide text-left"} "Description"]
-          [:th {:class "p-3 text-sm font-semibold tracking-wide text-left"} "Status"]]]
+     ;; Payment Information
+     [:fieldset {:class "col-span-3 border p-4 rounded"}
+      [:legend "Payment Information"]
+      [:div {:class "grid grid-cols-2 gap-4"}
+       [:div {:class "input-group"}
+        [:label "Expense Type:"]
+        [:input {:type "text" :name "expense_type"}]]
+       [:div {:class "input-group"}
+        [:label "Payment Method:"]
+        [:select {:name "payment_method"}
+         [:option {:value "credit_card"} "Credit Card"]
+         [:option {:value "cash"} "Cash"]
+         [:option {:value "bank_transfer"} "Bank Transfer"]
+         [:option {:value "cheque"} "Cheque"]
+         [:option {:value "installment_payment"} "Installment Payment"]]]]]
 
-        [:tbody
-         (for [{:keys [date amount currency type description status]} transactions]
-           [:tr {:class "border-b"}
-            [:td {:class "p-3"} date]
-            [:td {:class "p-3"} amount]
-            [:td {:class "p-3"} currency]
-            [:td {:class "p-3"} type]
-            [:td {:class "p-3"} description]
-            [:td {:class "p-3"} status]])]]]])))
+     ;; Expense Classification
+     [:fieldset {:class "col-span-3 border p-4 rounded"}
+      [:legend "Expense Classification"]
+      [:div {:class "grid grid-cols-2 gap-4"}
+       [:div {:class "input-group"}
+        [:label "Reimbursement Status:"]
+        [:select {:name "reimbursement_status"}
+         [:option {:value "pending"} "Pending"]
+         [:option {:value "approved"} "Approved"]
+         [:option {:value "reimbursed"} "Reimbursed"]]]
+       [:div {:class "input-group col-span-2"}
+        [:label "Business Purpose:"]
+        [:input {:type "text" :name "business_purpose"}]]
+       [:div {:class "input-group"}
+        [:label "Approval Status:"]
+        [:select {:name "approval_status"}
+         [:option {:value "pending"} "Pending"]
+         [:option {:value "approved"} "Approved"]
+         [:option {:value "rejected"} "Rejected"]]]
+       [:div {:class "input-group"}
+        [:label "Expense Date:"]
+        [:input {:type "date" :name "expense_date" :required true}]]]]
 
-
-
-
+     [:button {:type "submit"} "Submit"]]]))
 
 (defn invoices-component
   []
   (h/html
    [:div {:id "invoice-form"}
     [:h2 "Add Invoice"]
-    [:form {:class "flex flex-col items-center space-y-6"}
-     [:div {:class "input-group"}
-      [:label "Due Date"]
-      [:input {:type "date" :name "due-date" :required true}]]
-     [:div {:class "input-group"}
-      [:label "Amount"]
-      [:input {:type "number" :name "amount" :step "0.01" :min "0" :required true}]]
-     [:div {:class "input-group"}
-      [:label "Currency"]
-      [:input {:type "text" :name "currency" :required true}]]
-     [:div {:class "input-group"}
-      [:label "Status"]
-      [:select {:name "status"}
-       [:option {:value "unpaid"} "Unpaid"]
-       [:option {:value "paid"} "Paid"]]]
-     [:button {:type "submit" :hx-post "/add-invoice" :hx-target "#dashboard-content" :hx-swap "innerHTML"} "Submit"]]]
+    [:form {:class "grid grid-cols-3 gap-4"
+            :hx-post "/add-invoice"
+            :hx-target "#invoice-list"
+            :hx-swap "innerHTML"}
 
-    [:div
-     [:h2 "Invoice List"]
-     [:ul
-      [:li "Sample Invoice"]]]))
+     ;; Invoice Details
+     [:fieldset {:class "col-span-3 border p-4 rounded"}
+      [:legend "Invoice Details"]
+      [:div {:class "grid grid-cols-3 gap-4"}
+       [:div {:class "input-group"}
+        [:label "Invoice Number:"]
+        [:input {:type "text" :name "invoice_number"}]]
+       [:div {:class "input-group"}
+        [:label "Amount:"]
+        [:input {:type "number" :name "amount" :step "0.01" :min "0" :required true}]]
+       [:div {:class "input-group"}
+        [:label "Currency:"]
+        [:input {:type "text" :name "currency" :required true :value "EUR" :maxlength "3" :autocapitalize "characters"}]]
+       [:div {:class "input-group col-span-3"}
+        [:label "Description:"]
+        [:textarea {:name "description" :class "w-full h-48 resize-none"}]]]]
 
-(defn expenses-component
-  []
-  (h/html
-   [:div {:class "expenses-container"}
-    [:h2 "Add Expense"]
-    [:form {:class "flex flex-col items-center" :hx-post "/add-expense" :hx-target "#dashboard-content" :hx-swap "outerHTML"}
-     [:div {:class "input-group"}
-      [:label {:for "expense-category"} "Category"]
-      [:select {:name "expense-category" :required true}
-       [:option {:value "office-supplies"} "Office Supplies"]
-       [:option {:value "travel"} "Travel"]
-       [:option {:value "utilities"} "Utilities"]
-       [:option {:value "other"} "Other"]]]
-     [:div {:class "input-group"}
-      [:label {:for "amount"} "Amount"]
-      [:input {:type "number" :name "amount" :step "0.01" :required true}]]
-     [:div {:class "input-group"}
-      [:label {:for "currency"} "Currency"]
-      [:select {:name "currency"}
-       [:option {:value "USD"} "USD"]
-       [:option {:value "EUR"} "EUR"]
-       [:option {:value "GBP"} "GBP"]]]
-     [:div {:class "input-group"}
-      [:label {:for "description"} "Description"]
-      [:textarea {:name "description" :rows "3"}]]
-     [:div {:class "input-group"}
-      [:label {:for "status"} "Status"]
-      [:select {:name "status"}
-       [:option {:value "pending"} "Pending"]
-       [:option {:value "approved"} "Approved"]]]
-     [:button {:type "submit"} "Submit Expense"]]]
+     ;; Vendor Information
+     [:fieldset {:class "col-span-3 border p-4 rounded"}
+      [:legend "Vendor Information:"]
+      [:div {:class "grid grid-cols-3 gap-4"}
+       [:div {:class "input-group"}
+        [:label "Vendor Name:"]
+        [:input {:type "text" :name "vendor_name"}]]
+       [:div {:class "input-group"}
+        [:label "PO Number:"]
+        [:input {:type "text" :name "po_number"}]]
+       [:div {:class "input-group"}
+        [:label "VAT code:"]
+        [:input {:type "text" :name "vat_code"}]]]]
 
-   [:div {:class "expenses-list"}
-    [:h2 "Expense List"]
-    [:ul {:id "expense-list"}
-     [:li "Example Expense 1"]
-     [:li "Example Expense 2"]]]))
+     ;; Payment Information
+     [:fieldset {:class "col-span-3 border p-4 rounded"}
+      [:legend "Payment Information"]
+      [:div {:class "grid grid-cols-2 gap-4"}
+       [:div {:class "input-group"}
+        [:label {:class "col-span-2"} "Payment Method:"]
+        [:input {:type "text" :class "col-span-2" :name "payment_method"}]]
+       [:div {:class "input-group"}
+        [:label "Payment Terms:"]
+        [:input {:type "text" :name "payment_terms"}]]
+       [:div {:class "input-group"}
+        [:label "Due Date:"]
+        [:input {:type "date" :name "due-date" :required true}]]
+       [:div {:class "input-group"}
+        [:label "Payment Status:"]
+        [:select {:name "payment_status"}
+         [:option {:value "pending"} "Pending"]
+         [:option {:value "unpaid"} "Unpaid"]
+         [:option {:value "paid"} "Paid"]]]]]
+
+     [:button {:type "submit"} "Submit"]]]))
 
 
 (defn settings-component
   [email]
   (h/html
-   [:div 
+   [:div
     [:h2 "Profile Settings"]
     [:ul
-     [:li 
+     [:li
       [:p (str "Email: " email)]
       [:span ""]]
-     [:li 
+     [:li
       [:p "Password"]]]]
-   
-   [:div 
+
+   [:div
     [:h2 "Update Password"]
     [:form
      [:input]
      [:input]]]
-   
-   [:button "Delete Account"]
-   )
-)
+
+   [:button "Delete Account"]))
 
 (defn support-component
   []
@@ -241,8 +305,7 @@
     [:h2 "Feedback"]
     [:p "We value your feedback. Please let us know how we can improve."]
     [:textarea {:placeholder "Your feedback..." :rows "4" :cols "50"}]
-    [:button "Submit Feedback"]])
-   )
+    [:button "Submit Feedback"]]))
 
 (defn dashboard
   [email]
@@ -271,8 +334,8 @@
               [:button {:id "toggle-btn" :onclick "toggleSidebar()"}
                [:img {:src "/icons/toggle.svg" :alt "Toggle button"}]]]
              [:li {:class "selected"} [:a {:href "" :hx-get "/overview" :hx-target "#dashboard-content"}
-                                     [:img {:src "/icons/dashboard.svg" :alt "Dashboard Icon"}]
-                                     [:span "Overview"]]]
+                                       [:img {:src "/icons/dashboard.svg" :alt "Dashboard Icon"}]
+                                       [:span "Overview"]]]
              [:li [:a {:href "" :hx-get "/forms" :hx-target "#dashboard-content"}
                    [:img {:src "/icons/forms.svg" :alt "Forms Icon"}]
                    [:span "Forms"]]]

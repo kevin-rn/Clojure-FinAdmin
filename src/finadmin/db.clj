@@ -28,7 +28,8 @@
 
 (def insert-transaction-query
   "INSERT INTO transactions (amount, currency, description, account_email, transaction_type, payment_method) 
-   VALUES (?, ?, ?, ?, ?, ?)")
+   VALUES (?, ?, ?, ?, ?, ?) 
+   RETURNING transaction_id;")
 
 (def insert-invoice-query 
   "INSERT INTO invoices (transaction_id, invoice_number, vendor_name, po_number, vat_code, payment_terms, due_date, payment_status) 
@@ -86,7 +87,7 @@
       (:valid (hashers/verify password stored-hash {:alg :pbkdf2+sha256})))))
 
 
-(defn add-invoice
+(defn add-invoice-db
   "Adds a new invoice entry to the database, including transaction and invoice details.
   
      Parameters:
@@ -101,7 +102,7 @@
                                                  email
                                                  "invoice"
                                                  (invoice-details :payment_method)])
-           transaction-id (:transaction_id transaction-result)]
+           transaction-id (get-in transaction-result [0 :transactions/transaction_id])]
        (jdbc/execute-one! dc [insert-invoice-query
                               transaction-id
                               (invoice-details :invoice_number)
@@ -113,7 +114,7 @@
                               (invoice-details :payment_status)])))))
 
 
-(defn add-expense
+(defn add-expense-db
   "Adds a new expense entry to the database, including transaction and expense details.
 
    Parameters:
@@ -129,8 +130,7 @@
                                              email
                                              "expense"
                                              (:payment_method expense-details)])
-          transaction-id (:transaction_id (first transaction-result))]
-
+          transaction-id (get-in transaction-result [0 :transactions/transaction_id])]
       (jdbc/execute! dc
                      [insert-expense-query
                       transaction-id
@@ -225,34 +225,17 @@
     (jdbc/execute-one! dc ["DELETE FROM transactions WHERE account_email = ?", email])))
 
 (defn get-transactions-by-email
-  "Retrieves all transactions for a specific user based on their email address.
+  "Retrieves transactions for a specific user based on their email and optional transaction type.
 
    Parameters:
    - email: A string representing the user's email address.
+   - transaction-type: A string representing the type of transaction (optional).
    
    Returns:
-   - A sequence of maps, where each map represents a transaction for the given email, with keys corresponding to column names in the transactions table."
-  [email]
-  (jdbc/execute! database-connection ["SELECT * FROM transactions WHERE account_email = ?" email]))
-
-(defn get-invoices-by-email
-  "Retrieves all invoices for a specific user based on their email address.
-
-   Parameters:
-   - email: A string representing the user's email address.
-   
-   Returns:
-   - A sequence of maps, where each map represents an invoice for the given email, with keys corresponding to column names in the invoices table."
-  [email]
-  (jdbc/execute! database-connection ["SELECT * FROM invoices WHERE account_email = ?" email]))
-
-(defn get-expenses-by-email
-  "Retrieves all expenses for a specific user based on their email address.
-
-   Parameters:
-   - email: A string representing the user's email address.
-   
-   Returns:
-   - A sequence of maps, where each map represents an expense for the given email, with keys corresponding to column names in the expenses table."
-  [email]
-  (jdbc/execute! database-connection ["SELECT * FROM expenses WHERE account_email = ?" email]))
+   - A sequence of maps, where each map represents a transaction."
+  [email transaction-type]
+  (let [query (cond
+                (= transaction-type "all")  ["SELECT * FROM transactions WHERE account_email = ?" email]
+                (some #{"invoice" "expense"} [transaction-type]) ["SELECT * FROM transactions WHERE account_email = ? AND transaction_type = ?" email transaction-type]
+                :else (throw (ex-info "Invalid transaction type" {:type transaction-type})))]
+    (jdbc/execute! database-connection query)))

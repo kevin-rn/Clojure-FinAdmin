@@ -8,10 +8,13 @@
 (def app
   (-> (ring/ring-handler
        (ring/router
-        [["/" {:get handlers/login-page}]
+        [;; Login Page
+         ["/" {:get handlers/login-page}]
          ["/sign-in" {:get handlers/sign-in-page :post handlers/sign-in-account}]
          ["/sign-up" {:get handlers/sign-up-page :post handlers/sign-up-account}]
-         ["/dashboard" {:get handlers/dashboard-page}] 
+
+         ;; Dashboard links
+         ["/dashboard" {:get handlers/dashboard-page}]
          ["/overview" {:get handlers/overview}]
          ["/forms" {:get handlers/forms}]
          ["/transactions" {:get handlers/transactions}]
@@ -19,6 +22,12 @@
          ["/expenses" {:get handlers/expenses}]
          ["/support" {:get handlers/support}]
          ["/settings" {:get handlers/settings}]
-         ["/logout" {:get handlers/logout}]]))
+         ["/logout" {:get handlers/logout}]
+
+         ;; Transaction interaction
+         ["/filter-transactions" {:get handlers/filter-transactions}]
+         ["/add-expense" {:post handlers/add-expense}]
+         ["/add-invoice" {:post handlers/add-invoice}]]
+         ))
       (wrap-defaults (assoc-in site-defaults [:security :anti-forgery] false))
       (wrap-session)))

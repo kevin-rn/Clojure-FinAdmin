@@ -234,6 +234,43 @@ main {
     margin-bottom: 20px;
 }
 
-#invoice-form {
+#invoice-form fieldset, #expense-form fieldset {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.input-group {
+    margin: 10px;
+
+    > label {
+        margin-right: 5px;
+    }
+
     
+}
+
+
+#dashboard-content button {
+    background-color: var(--base-clr);
+    border: solid var(--base-clr);
+    color: var(--primary-txt-clr);
+    padding: 15px 32px;
+    margin-top: 10%;
+    /* width: 50%; */
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    border-radius: 10px;
+    transition-duration: 0.4s;
+}
+
+#dashboard-content button:hover {
+    background-color: var(--primary-txt-clr);
+    color: var(--base-clr);
+}
+
+#dashboard-content button:active, #dashboard-content button:focus {
+    background-color: var(--accent-clr);
+    color: var(--primary-txt-clr);
 }

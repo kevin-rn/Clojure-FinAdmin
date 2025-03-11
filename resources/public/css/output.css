@@ -1,4 +1,7 @@
 /*! tailwindcss v4.0.9 | MIT License | https://tailwindcss.com */
+.collapse {
+  visibility: collapse;
+}
 .static {
   position: static;
 }
@@ -8,8 +11,20 @@
 .z-10 {
   z-index: 10;
 }
+.col-span-2 {
+  grid-column: span 2 / span 2;
+}
+.col-span-3 {
+  grid-column: span 3 / span 3;
+}
 .flex {
   display: flex;
+}
+.grid {
+  display: grid;
+}
+.table {
+  display: table;
 }
 .h-\[80vh\] {
   height: 80vh;
@@ -35,6 +50,18 @@
 .border-collapse {
   border-collapse: collapse;
 }
+.resize {
+  resize: both;
+}
+.resize-none {
+  resize: none;
+}
+.grid-cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.grid-cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
 .flex-col {
   flex-direction: column;
 }
@@ -46,6 +73,10 @@
 }
 .overflow-auto {
   overflow: auto;
+}
+.border {
+  border-style: var(--tw-border-style);
+  border-width: 1px;
 }
 .border-b {
   border-bottom-style: var(--tw-border-style);
@@ -71,6 +102,13 @@
 .ring {
   --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentColor);
   box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+}
+.filter {
+  filter: var(--tw-blur,) var(--tw-brightness,) var(--tw-contrast,) var(--tw-grayscale,) var(--tw-hue-rotate,) var(--tw-invert,) var(--tw-saturate,) var(--tw-sepia,) var(--tw-drop-shadow,);
+}
+.select-none {
+  -webkit-user-select: none;
+  user-select: none;
 }
 @property --tw-border-style {
   syntax: "*";
@@ -131,4 +169,44 @@
   syntax: "*";
   inherits: false;
   initial-value: 0 0 #0000;
+}
+@property --tw-blur {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-brightness {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-contrast {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-grayscale {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-hue-rotate {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-invert {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-opacity {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-saturate {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-sepia {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-drop-shadow {
+  syntax: "*";
+  inherits: false;
 }
