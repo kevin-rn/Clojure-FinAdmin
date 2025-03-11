@@ -42,12 +42,24 @@ function closeAllSubMenus() {
 }
 
 function togglePassword(button) {
-    const input = button.closest('.input-group').querySelector('input[class="password"]');
-    if (input.hasAttribute('type')) {
-        if (input.type === 'password') {
-          input.type = 'text'; // Change type to 'text' to show the password
-        } else {
-          input.type = 'password'; // Change type back to 'password' to hide the password
-        }
+  const parentDiv = button.closest('.input-group')
+  const input = parentDiv.querySelector('input[class="password"]');
+  const visibilityIcon = parentDiv.querySelector('label.visibility-icon');
+
+  if (input.hasAttribute('type')) {
+      if (input.type === 'password') {
+          input.type = 'text';
+          visibilityIcon.classList.add('visible');
+          visibilityIcon.classList.remove('hidden');
+      } else {
+          input.type = 'password';
+          visibilityIcon.classList.add('hidden');
+          visibilityIcon.classList.remove('visible');
       }
+  }
+}
+
+
+function toggleAcknowledge(button) {
+  document.getElementById("delete-account-btn").disabled = !button.checked
 }

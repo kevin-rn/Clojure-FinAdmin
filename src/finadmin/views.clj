@@ -307,34 +307,33 @@
        [:img {:src "/icons/error.svg" :alt "Error message"}]
        [:p error]])
 
-    [:form
+    [:form {:id "password-reset"}
      [:div {:class "input-group grid grid-cols-6 grid-rows-1 gap-4"}
       [:label {:for "current-password"} "Current Password"]
       [:input {:class "password" :type "password" :name "current-password" :value ""}]
-      [:div {:class "checkbox"}
-       [:input {:type "checkbox" :class "toggle-password" :onclick "togglePassword(this)"}]
-       [:i "Show Password"]]]
-
+      [:input {:type "checkbox" :id "current-visibility" :class "visibility toggle-password" :onclick "togglePassword(this)"}]
+      [:label {:for "current-visibility" :class "visibility-icon hidden"}]]
      [:div {:class "input-group grid grid-cols-6 grid-rows-1 gap-4"}
       [:label {:for "new-password"} "New Password"]
       [:input {:class "password" :type "password" :name "new-password" :value ""}]
-      [:div {:class "checkbox"}
-       [:input {:type "checkbox" :class "toggle-password" :onclick "togglePassword(this)"}]
-       [:i "Show Password"]]]
-
+      [:input {:type "checkbox" :id "new-visibility" :class "visibility toggle-password" :onclick "togglePassword(this)"}]
+      [:label {:for "new-visibility" :class "visibility-icon hidden"}]]
      [:div {:class "input-group grid grid-cols-6 grid-rows-1 gap-4"}
       [:label {:for "verify-password"} "Verify New Password"]
       [:input {:class "password" :type "password" :name "verify-password" :value ""}]
-      [:div {:class "checkbox"}
-       [:input {:type "checkbox" :class "toggle-password" :onclick "togglePassword(this)"}]
-       [:i "Show Password"]]]
-
+      [:input {:type "checkbox" :id "verify-visibility" :class "visibility toggle-password" :onclick "togglePassword(this)"}]
+      [:label {:for "verify-visibility" :class "visibility-icon hidden"}]]
      [:button {:type "submit" :hx-post "/update-password" :hx-target "#dashboard-content"} "Update Password"]]]
 
-
-   [:div
-    [:button {:type "submit" :hx-post "/delete-account"} "Delete Account"]
-    [:p {:class "help-sign"} "Permanently deletes account and all connected transactions."]]))
+   [:div {:id "warning-sign"}
+    [:div 
+     [:p "Are you sure you want to delete your account?"] 
+     [:p "This action is permanent and cannot be undone."]
+     [:p "Deletes all user data, i.e. user account and all connected transactions."]]
+    [:div {:class "checkbox"}
+     [:input {:type "checkbox" :id "toggleAcknowledgement" :onclick "toggleAcknowledge(this)"}]
+     [:i  "I acknowledge this decision."]]
+    [:button {:type "submit" :id "delete-account-btn" :hx-post "/delete-account" :disabled true} "Delete Account"]]))
 
 (defn support-component
   []
