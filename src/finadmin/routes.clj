@@ -24,10 +24,12 @@
          ["/settings" {:get handlers/settings}]
          ["/logout" {:get handlers/logout}]
 
-         ;; Transaction interaction
+         ;; Interaction
          ["/filter-transactions" {:get handlers/filter-transactions}]
          ["/add-expense" {:post handlers/add-expense}]
-         ["/add-invoice" {:post handlers/add-invoice}]]
+         ["/add-invoice" {:post handlers/add-invoice}]
+         ["/update-password" {:post handlers/update-password}]
+         ["/delete-account" {:post handlers/delete-account}]]
          ))
       (wrap-defaults (assoc-in site-defaults [:security :anti-forgery] false))
       (wrap-session)))

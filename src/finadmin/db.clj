@@ -26,6 +26,7 @@
 
 (def database-connection {:datasource @datasource})
 
+;; Queries
 (def insert-transaction-query
   "INSERT INTO transactions (amount, currency, description, account_email, transaction_type, payment_method) 
    VALUES (?, ?, ?, ?, ?, ?) 
@@ -39,6 +40,7 @@
   "INSERT INTO expenses (transaction_id, expense_type, reimbursement_status, business_purpose, approval_status, expense_date) 
    VALUES (?, ?, ?, ?, ?, ?)")
 
+;; Account
 
 (defn create-user!
   "Creates a user account in the database with a secure hashed password.
@@ -86,7 +88,40 @@
     (when-let [stored-hash (:accounts/password result)]
       (:valid (hashers/verify password stored-hash {:alg :pbkdf2+sha256})))))
 
+(defn get-account-info
+  "Retrieves all information for given email and password match an existing account.
 
+   Parameters:
+   - email: A string representing the user's email address.
+   - password: A string representing the user's entered password.
+   
+   Returns:
+   - Account information (email, password, date created)
+   - false if the email doesn't exist or the password is incorrect."
+  [email password]
+(let [query "SELECT * FROM accounts WHERE email = ?"
+       result (jdbc/execute-one! database-connection [query email])]
+   (if (and result (hashers/verify password (:accounts/password result) {:alg :pbkdf2+sha256}))
+     (assoc result :accounts/password password)
+     false)))
+
+(defn update-password-db
+  [email new-password]
+  (let [query "UPDATE accounts SET password = ? WHERE email = ?"
+        hashed-new-password (hashers/derive new-password {:alg :pbkdf2+sha256})]
+    (jdbc/execute-one! database-connection [query hashed-new-password email])))
+
+(defn delete-account-db
+  "Deletes a user account and all associated transactions (on cascade also invoices and expenses).
+   
+   Parameters:
+   - email: A string representing the email of the account to delete."
+  [email]
+  (jdbc/with-transaction [dc database-connection]
+    (jdbc/execute-one! dc ["DELETE FROM accounts WHERE email = ?", email])
+    (jdbc/execute-one! dc ["DELETE FROM transactions WHERE account_email = ?", email])))
+
+;; Transactions
 (defn add-invoice-db
   "Adds a new invoice entry to the database, including transaction and invoice details.
   
@@ -213,17 +248,6 @@
       (jdbc/execute-one! dc ["DELETE FROM expenses WHERE expense_id = ?" expense-id])
       (jdbc/execute-one! dc ["DELETE FROM transactions WHERE transaction_id = ?" transaction-id]))))
 
-
-(defn delete-account
-  "Deletes a user account and all associated transactions (on cascade also invoices and expenses).
-   
-   Parameters:
-   - email: A string representing the email of the account to delete."
-  [email]
-  (jdbc/with-transaction [dc database-connection]
-    (jdbc/execute-one! dc ["DELETE FROM accounts WHERE email = ?", email])
-    (jdbc/execute-one! dc ["DELETE FROM transactions WHERE account_email = ?", email])))
-
 (defn get-transactions-by-email
   "Retrieves transactions for a specific user based on their email and optional transaction type.
 
@@ -239,3 +263,4 @@
                 (some #{"invoice" "expense"} [transaction-type]) ["SELECT * FROM transactions WHERE account_email = ? AND transaction_type = ?" email transaction-type]
                 :else (throw (ex-info "Invalid transaction type" {:type transaction-type})))]
     (jdbc/execute! database-connection query)))
+

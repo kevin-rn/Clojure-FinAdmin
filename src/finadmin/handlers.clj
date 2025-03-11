@@ -1,7 +1,8 @@
 (ns finadmin.handlers
   (:require
    [finadmin.db :refer [add-expense-db add-invoice-db create-user!
-                        email-exists? get-transactions-by-email
+                        delete-account-db email-exists? get-account-info
+                        get-transactions-by-email update-password-db
                         verify-account?]]
    [finadmin.views :as views]))
 
@@ -40,7 +41,7 @@
       :else
       {:status 301
        :headers {"HX-Redirect" "/dashboard"}
-       :session (assoc (:session request) :email email)})))
+       :session (assoc (:session request) :email email :password password)})))
 
 
 
@@ -68,7 +69,7 @@
         (create-user! email password)
         {:status 301
          :headers {"HX-Redirect" "/dashboard"}
-         :session (assoc (:session request) :email email)}))))
+         :session (assoc (:session request) :email email :password password)}))))
 
 ;;__________________________________________________
 
@@ -121,10 +122,12 @@
 
 (defn settings
   [request]
-  (let [{:keys [email]} (get-in request [:session])]
+  (let [{:keys [email password]} (get-in request [:session])
+        account (get-account-info email password)]
+    
     {:status 200
      :headers {"Content-Type" "text/html"}
-     :body (str (views/settings-component email))}))
+     :body (str (views/settings-component account {}))}))
 
 
 (defn support
@@ -167,3 +170,38 @@
                             (update :transaction_date #(java.time.LocalDate/parse %))
                             (update :expense_date #(java.time.LocalDate/parse %)))]
     (add-invoice-db email invoice-details)))
+
+(defn update-password
+  [request]
+  (let [{:keys [current-password new-password verify-password]} (get-in request [:params])
+        {:keys [email]} (get-in request [:session])
+        current-account (get-account-info email current-password)]
+     (cond
+       (or (empty? current-password) (empty? new-password) (empty? verify-password))
+       {:status 200
+        :headers {"Content-Type" "text/html"}
+        :body (str (views/settings-component current-account {:error "All fields are required!"}))}
+  
+       (not= new-password verify-password)
+       {:status 200
+        :headers {"Content-Type" "text/html"}
+        :body (str (views/settings-component current-account {:error "Passwords do not match!"}))}
+  
+       :else
+       (do
+         (update-password-db email new-password)
+         (let [new-account (get-account-info email new-password)]
+         {:status 200
+          :headers {"Content-Type" "text/html"}
+          :body (str (views/settings-component new-account {}))
+          :session (assoc (:session request) :password new-password)})
+         ))))
+
+(defn delete-account
+  [request]
+  (let [{:keys [email]} (get-in request [:session])]
+    (delete-account-db email))
+  {:status 301
+   :headers {"HX-Redirect" "/"}
+   :session nil}
+  )

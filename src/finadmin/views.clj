@@ -2,7 +2,19 @@
   (:require
    [hiccup.page :refer [include-css include-js]]
    [hiccup2.core :as h]
-   [ring.util.anti-forgery :refer [anti-forgery-field]]))
+   [ring.util.anti-forgery :refer [anti-forgery-field]])
+  (:import
+   [java.sql Timestamp]
+   [java.time.format DateTimeFormatter]
+   [java.util Locale]))
+
+
+(defn parse-and-format-date [datetime]
+  (if (instance? Timestamp datetime)
+    (let [output-formatter (.withLocale (DateTimeFormatter/ofPattern "d MMMM yyyy - HH:mm:ss") Locale/ENGLISH)
+          local-datetime (.toLocalDateTime datetime)]
+      (.format local-datetime output-formatter))
+    (throw (IllegalArgumentException. "Expected a java.sql.Timestamp object"))))
 
 (defn sign-in
   [{:keys [error]}]
@@ -14,15 +26,15 @@
                [:img {:src "/icons/error.svg" :alt "Error message"}]
                [:p error]])
             (h/raw (anti-forgery-field))
-            [:div {:class "input-group"}
-             [:span {:class "email-icon"}]
+            [:div.input-group
+             [:span.email-icon]
              [:input {:type "email" :name "email" :required true}]
              [:label {:for ""} "Email"]]
-            [:div {:class "input-group"}
-             [:span {:class "password-icon"}]
+            [:div.input-group
+             [:span.password-icon]
              [:input {:type "password" :name "password" :required true}]
              [:label {:for ""} "Password"]]
-            [:button {:type "submit" :hx-post "/sign-in" :hx-target "#sign-in" :hx-swap "outerHTML"} "Sign In"]
+            [:button {:type "submit" :hx-post "/sign-in" :hx-target "#sign-in"} "Sign In"]
 
             [:div {:class "text-center switch-sign"}
              [:span "Don't have an account? "]
@@ -34,20 +46,20 @@
            [:h1 {:class "text-center sign-title"} "Sign Up"]
            [:form {:class "flex flex-col items-center"}
             (when error
-              [:div {:class "error-message"}
+              [:div.error-message
                [:img {:src "/icons/error.svg" :alt "Error message"}]
                [:p error]])
             (h/raw (anti-forgery-field))
-            [:div {:class "input-group"}
-             [:span {:class "email-icon"}]
+            [:div.input-group
+             [:span.email-icon]
              [:input {:type "email" :name "email" :required true}]
              [:label "Email"]]
-            [:div {:class "input-group"}
-             [:span {:class "password-icon"}]
+            [:div.input-group
+             [:span.password-icon]
              [:input {:type "password" :name "password" :required true}]
              [:label "Password"]]
-            [:div {:class "input-group"}
-             [:span {:class "password-icon"}]
+            [:div.input-group
+             [:span.password-icon]
              [:input {:type "password" :name "repeat-password" :required true}]
              [:label "Repeat Password"]]
             [:button {:type "submit" :hx-post "/sign-up" :hx-target "#sign-up" :hx-swap "OuterHTML"} "Sign Up"]
@@ -55,7 +67,6 @@
             [:div {:class "text-center switch-sign"}
              [:span "Already have an account? "]
              [:a {:href "#" :class "sign-text" :hx-get "/sign-in" :hx-target "#auth-container"} "Sign In"]]]]))
-
 
 (defn login
   []
@@ -81,7 +92,10 @@
 (defn overview-component
   []
   (h/html
-   [:p "overview"]))
+   [:div
+    [:p "overview"]
+    ]
+   ))
 
 (defn forms-component
   []
@@ -94,6 +108,7 @@
     [:h2 "Documents:"]
     [:ul
      [:li "Some documents"]]]))
+
 
 
 (defn transactions-list
@@ -117,7 +132,7 @@
       [:tbody
        (for [{:transactions/keys [transaction_date amount currency transaction_type description payment_method]} transactions]
          [:tr {:class "border-b"}
-          [:td {:class "p-3"} transaction_date]
+          [:td {:class "p-3"} (parse-and-format-date transaction_date)]
           [:td {:class "p-3"} amount]
           [:td {:class "p-3"} currency]
           [:td {:class "p-3"} transaction_type]
@@ -213,8 +228,7 @@
     [:h2 "Add Invoice"]
     [:form {:class "grid grid-cols-3 gap-4"
             :hx-post "/add-invoice"
-            :hx-target "#invoice-list"
-            :hx-swap "innerHTML"}
+            :hx-target "#invoice-list"}
 
      ;; Invoice Details
      [:fieldset {:class "col-span-3 border p-4 rounded"}
@@ -271,24 +285,56 @@
 
 
 (defn settings-component
-  [email]
+  [account {:keys [error]}]
   (h/html
-   [:div
-    [:h2 "Profile Settings"]
-    [:ul
-     [:li
-      [:p (str "Email: " email)]
-      [:span ""]]
-     [:li
-      [:p "Password"]]]]
+   [:div#settings-form
+    [:h2 "Profile"]
+    [:div {:class "grid grid-cols-6 grid-rows-1 gap-4"}
+     [:div {:class "col-span-1"}
+      [:p "Email:"]
+      [:p "Password:"]
+      [:p "Created at:"]]
+
+      [:div {:class "col-span-3"}
+       [:p [:i (:accounts/email account)]] 
+       [:p [:i (:accounts/password account)]] 
+       [:p [:i (parse-and-format-date (:accounts/created_at account))]]]]]
 
    [:div
     [:h2 "Update Password"]
-    [:form
-     [:input]
-     [:input]]]
+    (when error
+      [:div.error-message
+       [:img {:src "/icons/error.svg" :alt "Error message"}]
+       [:p error]])
 
-   [:button "Delete Account"]))
+    [:form
+     [:div {:class "input-group grid grid-cols-6 grid-rows-1 gap-4"}
+      [:label {:for "current-password"} "Current Password"]
+      [:input {:class "password" :type "password" :name "current-password" :value ""}]
+      [:div {:class "checkbox"}
+       [:input {:type "checkbox" :class "toggle-password" :onclick "togglePassword(this)"}]
+       [:i "Show Password"]]]
+
+     [:div {:class "input-group grid grid-cols-6 grid-rows-1 gap-4"}
+      [:label {:for "new-password"} "New Password"]
+      [:input {:class "password" :type "password" :name "new-password" :value ""}]
+      [:div {:class "checkbox"}
+       [:input {:type "checkbox" :class "toggle-password" :onclick "togglePassword(this)"}]
+       [:i "Show Password"]]]
+
+     [:div {:class "input-group grid grid-cols-6 grid-rows-1 gap-4"}
+      [:label {:for "verify-password"} "Verify New Password"]
+      [:input {:class "password" :type "password" :name "verify-password" :value ""}]
+      [:div {:class "checkbox"}
+       [:input {:type "checkbox" :class "toggle-password" :onclick "togglePassword(this)"}]
+       [:i "Show Password"]]]
+
+     [:button {:type "submit" :hx-post "/update-password" :hx-target "#dashboard-content"} "Update Password"]]]
+
+
+   [:div
+    [:button {:type "submit" :hx-post "/delete-account"} "Delete Account"]
+    [:p {:class "help-sign"} "Permanently deletes account and all connected transactions."]]))
 
 (defn support-component
   []
@@ -304,7 +350,7 @@
    [:div
     [:h2 "Feedback"]
     [:p "We value your feedback. Please let us know how we can improve."]
-    [:textarea {:placeholder "Your feedback..." :rows "4" :cols "50"}]
+    [:textarea {:placeholder "Your feedback..." :name "description" :class "w-full h-48 resize-none"}]
     [:button "Submit Feedback"]]))
 
 (defn dashboard
