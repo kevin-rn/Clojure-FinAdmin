@@ -35,9 +35,6 @@
 .block {
   display: block;
 }
-.contents {
-  display: contents;
-}
 .flex {
   display: flex;
 }
@@ -46,9 +43,6 @@
 }
 .hidden {
   display: none;
-}
-.inline {
-  display: inline;
 }
 .inline-block {
   display: inline-block;
@@ -68,11 +62,17 @@
 .w-2\/3 {
   width: calc(2/3 * 100%);
 }
+.w-auto {
+  width: auto;
+}
 .w-full {
   width: 100%;
 }
 .min-w-3\/4 {
   min-width: calc(3/4 * 100%);
+}
+.min-w-max {
+  min-width: max-content;
 }
 .flex-1 {
   flex: 1;
@@ -115,9 +115,6 @@
 }
 .justify-center {
   justify-content: center;
-}
-.justify-start {
-  justify-content: flex-start;
 }
 .overflow-auto {
   overflow: auto;

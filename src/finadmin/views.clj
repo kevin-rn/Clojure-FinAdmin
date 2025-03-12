@@ -165,11 +165,17 @@
     [:h2 "Transaction History"]
 
     [:div
-     [:label {:for "transaction-type"} "Transaction Type"]
-     [:select {:name "transaction-type" :hx-get "/filter-transactions" :hx-target "#transaction-list" :hx-trigger "change"}
-      [:option {:value "all"} "All"]
-      [:option {:value "invoice"} "Invoices"]
-      [:option {:value "expense"} "Expenses"]]]
+     [:label {:for "transaction-type"} "Transaction Type: "]
+     [:div.custom-select
+      [:select {:name "transaction-type" 
+                :class "w-auto min-w-max"
+                :hx-get "/filter-transactions" 
+                :hx-target "#transaction-list" 
+                :hx-trigger "change"}
+       [:option {:value "all"} "All"]
+       [:option {:value "invoice"} "Invoices"]
+       [:option {:value "expense"} "Expenses"]]
+      [:span {:class "custom-select-arrow"}]]]
 
     [:div {:class "flex-1 overflow-auto mt-8" :id "transaction-list"}
      (transactions-list transactions)]]))
@@ -180,7 +186,7 @@
    [:div {:id "expense-form"}
     [:h2 "Add Expense"]
     (when modal
-      [:dialog {:open true}
+      [:dialog {:class "popup" :open true}
        [:p "Invoice has been registered succesfully!"]
        [:button {:onclick "closeModal(this)"} "Close"]])
     [:form {:class "grid grid-cols-3 gap-4"
@@ -195,9 +201,11 @@
         [:input {:type "number" :name "amount" :step "0.1" :min "0" :required true}]]
        [:div {:class "input-group"}
         [:label "Currency:"]
-        [:select {:name "currency" :required true}
-         (for [currency currencies]
-           [:option {:value currency :selected (if (= currency "EUR") "selected" nil)} currency])]]
+        [:div.custom-select
+         [:select {:name "currency" :required true}
+          (for [currency currencies]
+            [:option {:value currency :selected (if (= currency "EUR") "selected" nil)} currency])]
+         [:span {:class "custom-select-arrow"}]]]
        [:div {:class "input-group"}
         [:label "Expense Date:"]
         [:input {:type "date" :name "expense_date" :required true}]]
@@ -211,14 +219,18 @@
       [:div {:class "grid grid-cols-2 gap-4"}
        [:div {:class "input-group"}
         [:label "Expense Type:"]
-        [:select {:name "expense_type" :required true}
-         (for [expense-type expense-types]
-           [:option {:value expense-type :selected (if (= expense-type "Operating Expenses") "selected" nil)} expense-type])]]
+        [:div.custom-select
+         [:select {:name "expense_type" :required true}
+          (for [expense-type expense-types]
+            [:option {:value expense-type :selected (if (= expense-type "Operating Expenses") "selected" nil)} expense-type])]
+         [:span {:class "custom-select-arrow"}]]]
        [:div {:class "input-group"}
         [:label "Payment Method:"]
-        [:select {:name "payment_method" :required true}
-         (for [method payment-methods]
-           [:option {:value method :selected (if (= method "Bank transfer") "selected" nil)} method])]]]]
+        [:div.custom-select
+         [:select {:name "payment_method" :required true}
+          (for [method payment-methods]
+            [:option {:value method :selected (if (= method "Bank transfer") "selected" nil)} method])]
+         [:span {:class "custom-select-arrow"}]]]]]
 
      ;; Expense Classification
      [:fieldset {:class "col-span-3 border p-4 rounded"}
@@ -226,14 +238,18 @@
       [:div {:class "grid grid-cols-2 gap-4"}
        [:div {:class "input-group"}
         [:label "Reimbursement Status:"]
-        [:select {:name "reimbursement_status" :required true}
-         (for [status ["Pending" "Approved" "Rejected" "Paid" "Under Review"]]
-           [:option {:value status :selected (if (= status "Pending") "selected" nil)} status])]]
+        [:div.custom-select
+         [:select {:name "reimbursement_status" :required true}
+          (for [status ["Pending" "Approved" "Rejected" "Paid" "Under Review"]]
+            [:option {:value status :selected (if (= status "Pending") "selected" nil)} status])]
+         [:span {:class "custom-select-arrow"}]]]
        [:div {:class "input-group"}
         [:label "Approval Status:"]
-        [:select {:name "approval_status" :required true}
-         (for [status ["Pending" "Approved" "Rejected" "In Progress" "On Hold" "Completed" "Needs Revision" "Escalated"]]
-           [:option {:value status :selected (if (= status "Pending") "selected" nil)} status])]]
+        [:div.custom-select
+         [:select {:name "approval_status" :required true}
+          (for [status ["Pending" "Approved" "Rejected" "In Progress" "On Hold" "Completed" "Needs Revision" "Escalated"]]
+            [:option {:value status :selected (if (= status "Pending") "selected" nil)} status])]
+         [:span {:class "custom-select-arrow"}]]]
        [:div {:class "input-group col-span-2"}
         [:label "Business Purpose:"]
         [:textarea {:name "business_purpose" :class "w-full h-48 resize-none"}]]]]
@@ -246,7 +262,7 @@
    [:div {:id "invoice-form"}
     [:h2 "Add Invoice"] 
     (when modal
-      [:dialog {:open true}
+      [:dialog {:class "popup" :open true}
        [:p "Invoice has been registered succesfully!"]
        [:button {:onclick "closeModal(this)"} "Close"]])
     [:form {:class "grid grid-cols-3 gap-4"
@@ -265,9 +281,11 @@
         [:input {:type "number" :name "amount" :step "0.1" :min "0" :required true}]]
        [:div {:class "input-group"}
         [:label "Currency:"]
-        [:select {:name "currency" :required true}
-         (for [currency currencies]
-           [:option {:value currency :selected (if (= currency "EUR") "selected" nil)} currency])]]
+        [:div.custom-select
+         [:select {:name "currency" :required true}
+          (for [currency currencies]
+            [:option {:value currency :selected (if (= currency "EUR") "selected" nil)} currency])]
+         [:span {:class "custom-select-arrow"}]]]
        [:div {:class "input-group col-span-3"}
         [:label "Description:"]
         [:textarea {:name "description" :class "w-full h-48 resize-none"}]]]]
@@ -292,9 +310,11 @@
       [:div {:class "grid grid-cols-2 gap-4"}
        [:div {:class "input-group"}
         [:label {:class "col-span-2"} "Payment Method:"]
-        [:select {:name "payment_method" :required true}
-         (for [method payment-methods]
-           [:option {:value method :selected (if (= method "Bank transfer") "selected" nil)} method])]]
+        [:div.custom-select
+         [:select {:name "payment_method" :required true}
+          (for [method payment-methods]
+            [:option {:value method :selected (if (= method "Bank transfer") "selected" nil)} method])]
+         [:span {:class "custom-select-arrow"}]]]
        [:div {:class "input-group"}
         [:label "Payment Terms:"]
         [:input {:type "text" :name "payment_terms" :required true}]]
@@ -303,12 +323,13 @@
         [:input {:type "date" :name "due_date" :required true}]]
        [:div {:class "input-group"}
         [:label "Payment Status:"]
-        [:select {:name "payment_status" :required true}
-         (for [status ["Unpaid" "Paid" "Partial payment" "Overdue" "Pending"
-                       "Failed" "Canceled" "Refunded"]]
-           [:option {:value status :selected (if (= status "Unpaid") "selected" nil)} status])]]]]
-
-       [:button {:type "submit"} "Submit"]]]))
+        [:div.custom-select
+         [:select {:name "payment_status" :required true}
+          (for [status ["Unpaid" "Paid" "Partial payment" "Overdue" "Pending"
+                        "Failed" "Canceled" "Refunded"]]
+            [:option {:value status :selected (if (= status "Unpaid") "selected" nil)} status])]
+         [:span {:class "custom-select-arrow"}]]]]]
+     [:button {:type "submit"} "Submit"]]]))
 
 (defn settings-component
   [account {:keys [error modal]}]
@@ -353,7 +374,7 @@
                :hx-post "/update-password"
                :hx-target "#dashboard-content"} "Update Password"]]]
    (when modal
-     [:dialog {:open true}
+     [:dialog {:class "popup" :open true}
       [:p "Your password has been updated succesfully"]
       [:button {:onclick "closeModal(this)"} "Close"]])
 
