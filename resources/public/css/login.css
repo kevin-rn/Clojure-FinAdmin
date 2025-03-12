@@ -1,26 +1,4 @@
-:root {
-    --base-clr: #000123;
-    --accent-clr: #f87f74;
-    --primary-txt-clr: #ffffff;
-    --border-clr: #9b9b9b;
-    --box-shadow-clr: #ffffff3a;
-    --txt-shadow-clr: #000000;
-    --error-clr: #fedce0;
-    --error-border-clr: #f76e80;
-    --hover-filter-color: invert(59%) sepia(10%) saturate(7422%) hue-rotate(313deg) brightness(104%) contrast(94%);
-    --focus-filter-color: invert(73%) sepia(90%) saturate(346%) hue-rotate(37deg) brightness(95%) contrast(88%);
-}
-
-* {
-    padding: 0;
-    margin: 0;
-}
-
-body {
-    font-family: 'Montserrat', sans-serif;
-    height: 100vh;
-    width: 100vw;
-}
+@import url("global.css");
 
 .login-page {
     background-size: cover;

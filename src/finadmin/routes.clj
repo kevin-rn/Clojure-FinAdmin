@@ -1,6 +1,8 @@
 (ns finadmin.routes
   (:require
-   [finadmin.handlers :as handlers]
+   [finadmin.handlers.auth :as auth]
+   [finadmin.handlers.dashboard :as dashboard]
+   [finadmin.handlers.transactions :as transactions]
    [reitit.ring :as ring]
    [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
    [ring.middleware.session :refer [wrap-session]]))
@@ -9,27 +11,27 @@
   (-> (ring/ring-handler
        (ring/router
         [;; Login Page
-         ["/" {:get handlers/login-page}]
-         ["/sign-in" {:get handlers/sign-in-page :post handlers/sign-in-account}]
-         ["/sign-up" {:get handlers/sign-up-page :post handlers/sign-up-account}]
+         ["/" {:get auth/login-page}]
+         ["/sign-in" {:get auth/sign-in-page :post auth/sign-in-account}]
+         ["/sign-up" {:get auth/sign-up-page :post auth/sign-up-account}]
 
          ;; Dashboard links
-         ["/dashboard" {:get handlers/dashboard-page}]
-         ["/overview" {:get handlers/overview}]
-         ["/forms" {:get handlers/forms}]
-         ["/transactions" {:get handlers/transactions}]
-         ["/invoices" {:get handlers/invoices}]
-         ["/expenses" {:get handlers/expenses}]
-         ["/support" {:get handlers/support}]
-         ["/settings" {:get handlers/settings}]
-         ["/logout" {:get handlers/logout}]
+         ["/dashboard" {:get dashboard/dashboard-page}]
+         ["/overview" {:get dashboard/overview}]
+         ["/forms" {:get dashboard/forms}]
+         ["/transactions" {:get dashboard/transactions}]
+         ["/invoices" {:get dashboard/invoices}]
+         ["/expenses" {:get dashboard/expenses}]
+         ["/support" {:get dashboard/support}]
+         ["/settings" {:get dashboard/settings}]
+         ["/logout" {:get dashboard/logout}]
 
          ;; Interaction
-         ["/filter-transactions" {:get handlers/filter-transactions}]
-         ["/add-expense" {:post handlers/add-expense}]
-         ["/add-invoice" {:post handlers/add-invoice}]
-         ["/update-password" {:post handlers/update-password}]
-         ["/delete-account" {:post handlers/delete-account}]]
+         ["/filter-transactions" {:get transactions/filter-transactions}]
+         ["/add-expense" {:post transactions/add-expense}]
+         ["/add-invoice" {:post transactions/add-invoice}]
+         ["/update-password" {:post auth/update-password}]
+         ["/delete-account" {:post auth/delete-account}]]
          ))
       (wrap-defaults (assoc-in site-defaults [:security :anti-forgery] false))
       (wrap-session)))

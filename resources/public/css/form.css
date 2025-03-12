@@ -1,0 +1,180 @@
+dialog.popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: none;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 8px 0 var(--box-shadow-clr), 0 6px 20px 0 var(--box-shadow-clr);
+    width: 30%; /* Adjust width as needed */
+    max-width: 400px;
+    text-align: center;
+}
+
+select {
+    padding: 0.5em 4em 0.5em 1em;
+    background: var(--select-clr);
+    color: var(--primary-txt-clr);
+    border: 0;
+    /* appearance: none; */
+}
+
+.custom-select{
+    position: relative;
+    display: inline-block;
+}
+
+.custom-select-arrow {
+    position: absolute;
+    top: 0;
+    right:0;
+    display: block;
+    background: var(--select-arrow-clr);
+    height: 100%;
+    width: 3em;
+    pointer-events: none;
+}
+
+.custom-select-arrow::before,
+.custom-select-arrow::after {
+    --arr-size: 0.35em;
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 0;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.custom-select-arrow::before {
+    border-left: var(--arr-size) solid transparent;
+    border-right: var(--arr-size) solid transparent;
+    border-bottom: var(--arr-size) solid var(--primary-txt-clr);
+    top: 35%;
+}
+
+.custom-select-arrow::after {
+    border-left: var(--arr-size) solid transparent;
+    border-right: var(--arr-size) solid transparent;
+    border-top: var(--arr-size) solid var(--primary-txt-clr);
+    top: 65%;
+}
+
+
+#invoice-form fieldset, #expense-form fieldset {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.input-group {
+    margin: 10px;
+
+    > label {
+        margin-right: 5px;
+    }
+}
+
+
+/* https://moderncss.dev/pure-css-custom-checkbox-style/ */
+input[type="checkbox"]:not(.visibility) {
+    -webkit-appearance: none;
+    appearance: none;
+    font: inherit;
+    color: currentColor;
+    width: 1.15em;
+    height: 1.15em;
+    border: 0.15em solid currentColor;
+    border-radius: 0.15em;
+    transform: translateY(-0.075em);
+    display: grid;
+    place-content: center;
+}
+  
+input[type="checkbox"]:not(.visibility)::before {
+    content: "";
+    width: 0.65em;
+    height: 0.65em;
+    clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+    transform: scale(0);
+    transform-origin: bottom left;
+    transition: 120ms transform ease-in-out;
+    box-shadow: inset 1em 1em var(--form-control-color);
+    background-color: CanvasText;
+  }
+  
+input[type="checkbox"]:not(.visibility):checked::before {
+    transform: scale(1);
+}
+  
+  /* input[type="checkbox"]:focus {
+    outline: max(2px, 0.15em) solid currentColor;
+    outline-offset: max(2px, 0.15em);
+  } */
+
+.checkbox {
+    display: flex;
+    align-items: center;
+    margin-left: 10px;
+    
+    > i {
+        margin-left: 10px;
+        font-size: 14px;
+        user-select:none;
+    }
+}
+
+.visibility {
+    display: none;
+}
+
+.visibility-icon {
+    display: inline-block;
+    margin-left: 10px;
+    width: 30px;
+    background-repeat: no-repeat;
+    cursor: pointer;
+    background-image: url("/icons/visibility.svg");
+    filter: var(--focus-filter-color);
+}
+
+.visibility-icon.visible {
+    background-image: url("/icons/visibility-off.svg");
+}
+
+.visibility-icon.hidden {
+    background-image: url("/icons/visibility.svg");
+}
+
+.error-message {
+    margin-top: 10px;
+    border-radius: 10px;
+    padding: 10px;
+    width: 35%;
+    height: auto;
+    background-color: var(--error-clr);
+    border: 1px solid var(--error-border-clr); 
+    gap: 10px;
+
+    > p {
+        font-size: 14px;
+        color: var(--error-border-clr);
+        font-weight: 600;
+        margin-top: 5px;
+    }
+
+    > img {
+        flex-shrink: 0;
+        filter: var(--hover-filter-color);
+    }
+}
+
+#warning-sign p {
+    margin: 5px;
+    font-style: italic;
+    font-size: 13px;
+}
+
+#warning-sign > div {
+    margin-bottom: 5px;
+}
