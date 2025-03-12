@@ -7,7 +7,8 @@
     --txt-shadow-clr: #000000;
     --error-clr: #fedce0;
     --error-border-clr: #f76e80;
-    --filter-color: invert(59%) sepia(10%) saturate(7422%) hue-rotate(313deg) brightness(104%) contrast(94%);
+    --hover-filter-color: invert(59%) sepia(10%) saturate(7422%) hue-rotate(313deg) brightness(104%) contrast(94%);
+    --focus-filter-color: invert(73%) sepia(90%) saturate(346%) hue-rotate(37deg) brightness(95%) contrast(88%);
 }
 
 * {
@@ -79,7 +80,7 @@ input {
     display: inline-block;
 }
 
-.input-group label {
+.input-group label.labeltext {
     position: absolute;
     transform: translateY(-50%);
     top: 50%;
@@ -106,8 +107,8 @@ input {
     border: 1.2px solid var(--accent-clr);
 }
 
-.input-group input:focus~label,
-.input-group input:valid~label {
+.input-group input:focus~label.labeltext,
+.input-group input:valid~label.labeltext {
     top: 0;
     background: var(--accent-clr);
     font-size: 14px;
@@ -135,6 +136,32 @@ input {
 .password-icon::before {
     content: url('../img/password-icon.png');
     transform: scale(0.3);
+}
+
+.visibility {
+    display: none;
+}
+
+.visibility-icon {
+    display: inline-block;
+    margin-top: 5%;
+    margin-left: -10%;
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background-repeat: no-repeat;
+    cursor: pointer;
+    background-image: url("/icons/visibility.svg");
+    filter: var(--focus-filter-color);
+    z-index: 2;
+}
+
+.visibility-icon.visible {
+    background-image: url("/icons/visibility-off.svg");
+}
+
+.visibility-icon.hidden {
+    background-image: url("/icons/visibility.svg");
 }
 
 button {
@@ -195,6 +222,6 @@ button:active, button:focus {
 
     > img {
         flex-shrink: 0;
-        filter: var(--filter-color);
+        filter: var(--hover-filter-color);
     }
 }

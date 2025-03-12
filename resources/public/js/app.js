@@ -2,10 +2,10 @@ const toggleButton = document.getElementById('toggle-btn');
 const sidebar = document.getElementById('sidebar');
 
 $(document).ready(function () {
-  // Highlight selected menu item when clicked
-  $("#sidebar a").on("click", function () {
-    $("#sidebar").find(".selected").removeClass("selected");
-    $(this).parent().addClass("selected");
+  // Highlight selected menu item when clicked.
+  $('#sidebar a').on('click', function () {
+    $('#sidebar').find('.selected').removeClass('selected');
+    $(this).parent().addClass('selected');
   });
 });
 
@@ -43,7 +43,7 @@ function closeAllSubMenus() {
 
 function togglePassword(button) {
   const parentDiv = button.closest('.input-group')
-  const input = parentDiv.querySelector('input[class="password"]');
+  const input = parentDiv.querySelector('input.password');
   const visibilityIcon = parentDiv.querySelector('label.visibility-icon');
 
   if (input.hasAttribute('type')) {
@@ -59,7 +59,10 @@ function togglePassword(button) {
   }
 }
 
-
 function toggleAcknowledge(button) {
-  document.getElementById("delete-account-btn").disabled = !button.checked
+  document.getElementById('delete-account-btn').disabled = !button.checked
+}
+
+function closeModal(button) {
+  button.closest('dialog').close()
 }

@@ -122,33 +122,6 @@
     (jdbc/execute-one! dc ["DELETE FROM transactions WHERE account_email = ?", email])))
 
 ;; Transactions
-(defn add-invoice-db
-  "Adds a new invoice entry to the database, including transaction and invoice details.
-  
-     Parameters:
-     - email: A string representing the email of the account creating the invoice.
-     - invoice-details: A map containing the details of the invoice."
-  [email invoice-details] 
-  ((jdbc/with-transaction [dc database-connection]
-     (let [transaction-result (jdbc/execute! dc [insert-transaction-query
-                                                 (invoice-details :amount)
-                                                 (invoice-details :currency)
-                                                 (invoice-details :description)
-                                                 email
-                                                 "invoice"
-                                                 (invoice-details :payment_method)])
-           transaction-id (get-in transaction-result [0 :transactions/transaction_id])]
-       (jdbc/execute-one! dc [insert-invoice-query
-                              transaction-id
-                              (invoice-details :invoice_number)
-                              (invoice-details :vendor_name)
-                              (invoice-details :po_number)
-                              (invoice-details :vat_code)
-                              (invoice-details :payment_terms)
-                              (invoice-details :due_date)
-                              (invoice-details :payment_status)])))))
-
-
 (defn add-expense-db
   "Adds a new expense entry to the database, including transaction and expense details.
 
@@ -159,7 +132,7 @@
   (jdbc/with-transaction [dc database-connection]
     (let [transaction-result (jdbc/execute! dc
                                             [insert-transaction-query
-                                             (:amount expense-details)
+                                             (Double. (:amount expense-details))
                                              (:currency expense-details)
                                              (:description expense-details)
                                              email
@@ -173,7 +146,33 @@
                       (:reimbursement_status expense-details)
                       (:business_purpose expense-details)
                       (:approval_status expense-details)
-                      (:expense_date expense-details)]))))
+                      (java.time.LocalDate/parse (:expense_date expense-details))]))))
+
+(defn add-invoice-db
+  "Adds a new invoice entry to the database, including transaction and invoice details.
+  
+     Parameters:
+     - email: A string representing the email of the account creating the invoice.
+     - invoice-details: A map containing the details of the invoice."
+  [email invoice-details] 
+  ((jdbc/with-transaction [dc database-connection]
+     (let [transaction-result (jdbc/execute! dc [insert-transaction-query
+                                                 (Double. (:amount invoice-details))
+                                                 (:currency invoice-details)
+                                                 (:description invoice-details)
+                                                 email
+                                                 "invoice"
+                                                 (:payment_method invoice-details)])
+           transaction-id (get-in transaction-result [0 :transactions/transaction_id])]
+       (jdbc/execute-one! dc [insert-invoice-query
+                              transaction-id
+                              (:invoice_number invoice-details)
+                              (:vendor_name invoice-details)
+                              (:po_number invoice-details)
+                              (:vat_code invoice-details)
+                              (:payment_terms invoice-details)
+                              (java.time.LocalDate/parse (:due_date invoice-details))
+                              (:payment_status invoice-details)])))))
 
 (defn build-update-query
   "Generates an UPDATE SQL query and corresponding values for fields that are not nil.

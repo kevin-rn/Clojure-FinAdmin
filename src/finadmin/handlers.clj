@@ -7,10 +7,14 @@
    [finadmin.views :as views]))
 
 (defn login-page
-  [_]
-  {:status 200
-   :headers {"Content-Type" "text/html"}
-   :body (views/login)})
+  [request]
+  (let [{:keys [email]} (get-in request [:session])]
+    (if (nil? email)
+      {:status 200
+       :headers {"Content-Type" "text/html"}
+       :body (views/login)}
+      {:status 302
+       :headers {"Location" "/dashboard"}})))
 
 (defn sign-in-page
   [_]
@@ -112,23 +116,21 @@
   [_]
   {:status 200
    :headers {"Content-Type" "text/html"}
-   :body (str (views/invoices-component))})
+   :body (str (views/invoices-component {}))})
 
 (defn expenses
   [_]
   {:status 200
    :headers {"Content-Type" "text/html"}
-   :body (str (views/expenses-component))})
+   :body (str (views/expenses-component {}))})
 
 (defn settings
   [request]
   (let [{:keys [email password]} (get-in request [:session])
-        account (get-account-info email password)]
-    
+        account (get-account-info email password)] 
     {:status 200
      :headers {"Content-Type" "text/html"}
      :body (str (views/settings-component account {}))}))
-
 
 (defn support
   [_]
@@ -156,20 +158,20 @@
 (defn add-expense
   [request]
   (let [{:keys [email]} (get-in request [:session])
-        expense-details (-> request :params
-                            (update :amount #(Double. %))
-                            (update :transaction_date #(java.time.LocalDate/parse %))
-                            (update :expense_date #(java.time.LocalDate/parse %)))]
-    (add-expense-db email expense-details)))
+        expense-details (request :params)]
+    (add-expense-db email expense-details)
+    {:status 200
+     :headers {"Content-Type" "text/html"}
+     :body (str (views/expenses-component {:modal true}))}))
 
 (defn add-invoice
   [request]
   (let [{:keys [email]} (get-in request [:session])
-        invoice-details (-> request :params
-                            (update :amount #(Double. %))
-                            (update :transaction_date #(java.time.LocalDate/parse %))
-                            (update :expense_date #(java.time.LocalDate/parse %)))]
-    (add-invoice-db email invoice-details)))
+        invoice-details (request :params)]
+    (add-invoice-db email invoice-details)
+    {:status 200
+     :headers {"Content-Type" "text/html"}
+     :body (str (views/invoices-component {:modal true}))}))
 
 (defn update-password
   [request]
@@ -193,7 +195,7 @@
          (let [new-account (get-account-info email new-password)]
          {:status 200
           :headers {"Content-Type" "text/html"}
-          :body (str (views/settings-component new-account {}))
+          :body (str (views/settings-component new-account {:modal true}))
           :session (assoc (:session request) :password new-password)})
          ))))
 

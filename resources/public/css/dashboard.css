@@ -7,6 +7,8 @@
     --border-clr: #9b9b9b;
     --box-shadow-clr: #ffffff3a;
     --txt-shadow-clr: #000000;
+    --error-clr: #fedce0;
+    --error-border-clr: #f76e80;
     --hover-filter-color: invert(59%) sepia(10%) saturate(7422%) hue-rotate(313deg) brightness(104%) contrast(94%);
     --focus-filter-color: invert(73%) sepia(90%) saturate(346%) hue-rotate(37deg) brightness(95%) contrast(88%);
 }
@@ -352,26 +354,26 @@ input[type="checkbox"]:not(.visibility):checked::before {
     background-image: url("/icons/visibility.svg");
 }
 
-
-div.error-message {
+.error-message {
     margin-top: 10px;
     border-radius: 10px;
     padding: 10px;
-    width: 50%;
+    width: 35%;
     height: auto;
     background-color: var(--error-clr);
     border: 1px solid var(--error-border-clr); 
+    gap: 10px;
+
     > p {
         font-size: 14px;
-        text-align: left;
-        margin-left: 5px;
         color: var(--error-border-clr);
         font-weight: 600;
+        margin-top: 5px;
     }
 
     > img {
         flex-shrink: 0;
-        filter: var(--filter-color);
+        filter: var(--hover-filter-color);
     }
 }
 
@@ -386,3 +388,57 @@ div.error-message {
 }
 
 
+dialog {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: none;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 8px 0 var(--box-shadow-clr), 0 6px 20px 0 var(--box-shadow-clr);
+    width: 30%; /* Adjust width as needed */
+    max-width: 400px;
+    text-align: center;
+}
+
+#faq-section {
+    ul {
+        list-style-type: none;
+        padding-left: 0;
+        margin-top: 5px;
+    }
+
+    li {
+        position: relative;
+        padding-left: 20px; /* Space for the custom icon */
+        margin-bottom: 10px;
+
+        > p:first-child {
+            font-weight: 520;
+            font-style: oblique;
+        }
+
+        >a {
+            font-style: oblique;
+            color: var(--base-clr);
+        }
+
+        >a:hover {
+            font-style: oblique;
+            color: var(--accent-clr);
+        }
+    }
+
+    li::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        width: 20px;
+        height: 20px;
+        background-image: url('/icons/item.svg'); /* Ensure this path is correct */
+        background-size: contain;
+        background-repeat: no-repeat;
+        filter: invert(1) sepia(1) saturate(5) hue-rotate(180deg); /* Filter applied only to the icon */
+    }
+}

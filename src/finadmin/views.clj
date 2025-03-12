@@ -1,13 +1,26 @@
 (ns finadmin.views
   (:require
    [hiccup.page :refer [include-css include-js]]
-   [hiccup2.core :as h]
-   [ring.util.anti-forgery :refer [anti-forgery-field]])
+   [hiccup2.core :as h])
   (:import
    [java.sql Timestamp]
    [java.time.format DateTimeFormatter]
    [java.util Locale]))
 
+(def currencies ["ARS" "AUD" "BHD" "BRL" "CAD" "CHF"
+                 "CNY" "COP" "CZK" "DKK" "EGP" "EUR"
+                 "GBP" "HKD" "ILS" "INR" "IDR" "JPY"
+                 "KRW" "KWD" "MAD" "MXN" "MYR" "NOK"
+                 "PEN" "PHP" "PLN" "RUB" "SAR" "SEK"
+                 "SGD" "THB" "TRY" "USD" "VND" "ZAR" "NZD"])
+
+(def expense-types ["Fixed Expenses" "Variable Expenses" "Operating Expenses"
+                    "Capital Expenses" "Interest Expenses" "Depreciation Expenses"
+                    "Cost of Goods Sold" "Non-operating Expenses" "Miscellaneous Expenses"])
+
+(def payment-methods ["Credit card" "Debit card" "Online payment" 
+                      "Bank transfer" "BNPL" "Cash" "Check" 
+                      "Crypto" "Mobile payment" "Other"])
 
 (defn parse-and-format-date [datetime]
   (if (instance? Timestamp datetime)
@@ -25,15 +38,17 @@
               [:div {:class "error-message flex items-center"}
                [:img {:src "/icons/error.svg" :alt "Error message"}]
                [:p error]])
-            (h/raw (anti-forgery-field))
             [:div.input-group
              [:span.email-icon]
              [:input {:type "email" :name "email" :required true}]
-             [:label {:for ""} "Email"]]
+             [:label {:for "email" :class "labeltext"} "Email"]]
             [:div.input-group
              [:span.password-icon]
-             [:input {:type "password" :name "password" :required true}]
-             [:label {:for ""} "Password"]]
+             [:input {:type "password" :class "password" :name "password" :required true}]
+             [:label {:for "password" :class "labeltext"} "Password"]
+             [:input {:type "checkbox" :id "visibility" :class "visibility toggle-password" :onclick "togglePassword(this)"}]
+             [:label {:for "visibility" :class "visibility-icon hidden"}]]
+             
             [:button {:type "submit" :hx-post "/sign-in" :hx-target "#sign-in"} "Sign In"]
 
             [:div {:class "text-center switch-sign"}
@@ -49,19 +64,23 @@
               [:div.error-message
                [:img {:src "/icons/error.svg" :alt "Error message"}]
                [:p error]])
-            (h/raw (anti-forgery-field))
             [:div.input-group
              [:span.email-icon]
              [:input {:type "email" :name "email" :required true}]
-             [:label "Email"]]
+             [:label {:for "email" :class "labeltext"} "Email"]]
             [:div.input-group
              [:span.password-icon]
-             [:input {:type "password" :name "password" :required true}]
-             [:label "Password"]]
+             [:input {:type "password" :class "password" :name "password" :required true}]
+             [:label {:for "password" :class "labeltext"} "Password"]
+             [:input {:type "checkbox" :id "new-visibility" :class "visibility toggle-password" :onclick "togglePassword(this)"}]
+             [:label {:for "new-visibility" :class "visibility-icon hidden"}]]
             [:div.input-group
              [:span.password-icon]
-             [:input {:type "password" :name "repeat-password" :required true}]
-             [:label "Repeat Password"]]
+             [:input {:type "password" :class "password" :name "verify-password" :required true}]
+             [:label {:for "verify-password" :class "labeltext"} "Repeat Password"]
+             [:input {:type "checkbox" :id "repeat-visibility" :class "visibility toggle-password" :onclick "togglePassword(this)"}]
+             [:label {:for "repeat-visibility" :class "visibility-icon hidden"}]]
+
             [:button {:type "submit" :hx-post "/sign-up" :hx-target "#sign-up" :hx-swap "OuterHTML"} "Sign Up"]
 
             [:div {:class "text-center switch-sign"}
@@ -78,6 +97,8 @@
           (include-css "/css/output.css")
           (include-css "/css/login.css")
           (include-js "https://unpkg.com/htmx.org@2.0.4")
+          (include-js "https://code.jquery.com/jquery-3.6.0.min.js")
+          [:script {:src "/js/app.js" :defer true}]
           [:link {:href "https://fonts.googleapis.com/css?family=Montserrat:400,900" :rel "stylesheet"}]
           [:link {:rel "icon" :href "/logo/favicon.ico" :type "image/x-icon"}]]
          [:body {:class "bg-[url(../img/login-background.png)] login-page"}
@@ -108,8 +129,6 @@
     [:h2 "Documents:"]
     [:ul
      [:li "Some documents"]]]))
-
-
 
 (defn transactions-list
   [transactions]
@@ -156,10 +175,14 @@
      (transactions-list transactions)]]))
 
 (defn expenses-component
-  []
+  [{:keys [modal]}]
   (h/html
    [:div {:id "expense-form"}
     [:h2 "Add Expense"]
+    (when modal
+      [:dialog {:open true}
+       [:p "Invoice has been registered succesfully!"]
+       [:button {:onclick "closeModal(this)"} "Close"]])
     [:form {:class "grid grid-cols-3 gap-4"
             :hx-post "/add-expense"}
 
@@ -168,14 +191,16 @@
       [:legend "Expense Details"]
       [:div {:class "grid grid-cols-3 gap-4"}
        [:div {:class "input-group"}
-        [:label "Transaction Date:"]
-        [:input {:type "date" :name "transaction_date" :required true}]]
-       [:div {:class "input-group"}
         [:label "Amount:"]
-        [:input {:type "number" :name "amount" :step "0.01" :min "0" :required true}]]
+        [:input {:type "number" :name "amount" :step "0.1" :min "0" :required true}]]
        [:div {:class "input-group"}
         [:label "Currency:"]
-        [:input {:type "text" :name "currency" :required true :value "EUR" :maxlength "3" :autocapitalize "characters"}]]
+        [:select {:name "currency" :required true}
+         (for [currency currencies]
+           [:option {:value currency :selected (if (= currency "EUR") "selected" nil)} currency])]]
+       [:div {:class "input-group"}
+        [:label "Expense Date:"]
+        [:input {:type "date" :name "expense_date" :required true}]]
        [:div {:class "input-group col-span-3"}
         [:label "Description:"]
         [:textarea {:name "description" :class "w-full h-48 resize-none"}]]]]
@@ -186,15 +211,14 @@
       [:div {:class "grid grid-cols-2 gap-4"}
        [:div {:class "input-group"}
         [:label "Expense Type:"]
-        [:input {:type "text" :name "expense_type"}]]
+        [:select {:name "expense_type" :required true}
+         (for [expense-type expense-types]
+           [:option {:value expense-type :selected (if (= expense-type "Operating Expenses") "selected" nil)} expense-type])]]
        [:div {:class "input-group"}
         [:label "Payment Method:"]
-        [:select {:name "payment_method"}
-         [:option {:value "credit_card"} "Credit Card"]
-         [:option {:value "cash"} "Cash"]
-         [:option {:value "bank_transfer"} "Bank Transfer"]
-         [:option {:value "cheque"} "Cheque"]
-         [:option {:value "installment_payment"} "Installment Payment"]]]]]
+        [:select {:name "payment_method" :required true}
+         (for [method payment-methods]
+           [:option {:value method :selected (if (= method "Bank transfer") "selected" nil)} method])]]]]
 
      ;; Expense Classification
      [:fieldset {:class "col-span-3 border p-4 rounded"}
@@ -202,33 +226,32 @@
       [:div {:class "grid grid-cols-2 gap-4"}
        [:div {:class "input-group"}
         [:label "Reimbursement Status:"]
-        [:select {:name "reimbursement_status"}
-         [:option {:value "pending"} "Pending"]
-         [:option {:value "approved"} "Approved"]
-         [:option {:value "reimbursed"} "Reimbursed"]]]
-       [:div {:class "input-group col-span-2"}
-        [:label "Business Purpose:"]
-        [:input {:type "text" :name "business_purpose"}]]
+        [:select {:name "reimbursement_status" :required true}
+         (for [status ["Pending" "Approved" "Rejected" "Paid" "Under Review"]]
+           [:option {:value status :selected (if (= status "Pending") "selected" nil)} status])]]
        [:div {:class "input-group"}
         [:label "Approval Status:"]
-        [:select {:name "approval_status"}
-         [:option {:value "pending"} "Pending"]
-         [:option {:value "approved"} "Approved"]
-         [:option {:value "rejected"} "Rejected"]]]
-       [:div {:class "input-group"}
-        [:label "Expense Date:"]
-        [:input {:type "date" :name "expense_date" :required true}]]]]
+        [:select {:name "approval_status" :required true}
+         (for [status ["Pending" "Approved" "Rejected" "In Progress" "On Hold" "Completed" "Needs Revision" "Escalated"]]
+           [:option {:value status :selected (if (= status "Pending") "selected" nil)} status])]]
+       [:div {:class "input-group col-span-2"}
+        [:label "Business Purpose:"]
+        [:textarea {:name "business_purpose" :class "w-full h-48 resize-none"}]]]]
 
      [:button {:type "submit"} "Submit"]]]))
 
 (defn invoices-component
-  []
+  [{:keys [modal]}]
   (h/html
    [:div {:id "invoice-form"}
-    [:h2 "Add Invoice"]
+    [:h2 "Add Invoice"] 
+    (when modal
+      [:dialog {:open true}
+       [:p "Invoice has been registered succesfully!"]
+       [:button {:onclick "closeModal(this)"} "Close"]])
     [:form {:class "grid grid-cols-3 gap-4"
             :hx-post "/add-invoice"
-            :hx-target "#invoice-list"}
+            :hx-target "#invoice-form"}
 
      ;; Invoice Details
      [:fieldset {:class "col-span-3 border p-4 rounded"}
@@ -236,13 +259,15 @@
       [:div {:class "grid grid-cols-3 gap-4"}
        [:div {:class "input-group"}
         [:label "Invoice Number:"]
-        [:input {:type "text" :name "invoice_number"}]]
+        [:input {:type "text" :name "invoice_number" :required true}]]
        [:div {:class "input-group"}
         [:label "Amount:"]
-        [:input {:type "number" :name "amount" :step "0.01" :min "0" :required true}]]
+        [:input {:type "number" :name "amount" :step "0.1" :min "0" :required true}]]
        [:div {:class "input-group"}
         [:label "Currency:"]
-        [:input {:type "text" :name "currency" :required true :value "EUR" :maxlength "3" :autocapitalize "characters"}]]
+        [:select {:name "currency" :required true}
+         (for [currency currencies]
+           [:option {:value currency :selected (if (= currency "EUR") "selected" nil)} currency])]]
        [:div {:class "input-group col-span-3"}
         [:label "Description:"]
         [:textarea {:name "description" :class "w-full h-48 resize-none"}]]]]
@@ -253,13 +278,13 @@
       [:div {:class "grid grid-cols-3 gap-4"}
        [:div {:class "input-group"}
         [:label "Vendor Name:"]
-        [:input {:type "text" :name "vendor_name"}]]
+        [:input {:type "text" :name "vendor_name" :required true}]]
        [:div {:class "input-group"}
         [:label "PO Number:"]
-        [:input {:type "text" :name "po_number"}]]
+        [:input {:type "text" :name "po_number" :required true}]]
        [:div {:class "input-group"}
         [:label "VAT code:"]
-        [:input {:type "text" :name "vat_code"}]]]]
+        [:input {:type "text" :name "vat_code" :required true}]]]]
 
      ;; Payment Information
      [:fieldset {:class "col-span-3 border p-4 rounded"}
@@ -267,25 +292,26 @@
       [:div {:class "grid grid-cols-2 gap-4"}
        [:div {:class "input-group"}
         [:label {:class "col-span-2"} "Payment Method:"]
-        [:input {:type "text" :class "col-span-2" :name "payment_method"}]]
+        [:select {:name "payment_method" :required true}
+         (for [method payment-methods]
+           [:option {:value method :selected (if (= method "Bank transfer") "selected" nil)} method])]]
        [:div {:class "input-group"}
         [:label "Payment Terms:"]
-        [:input {:type "text" :name "payment_terms"}]]
+        [:input {:type "text" :name "payment_terms" :required true}]]
        [:div {:class "input-group"}
         [:label "Due Date:"]
-        [:input {:type "date" :name "due-date" :required true}]]
+        [:input {:type "date" :name "due_date" :required true}]]
        [:div {:class "input-group"}
         [:label "Payment Status:"]
-        [:select {:name "payment_status"}
-         [:option {:value "pending"} "Pending"]
-         [:option {:value "unpaid"} "Unpaid"]
-         [:option {:value "paid"} "Paid"]]]]]
+        [:select {:name "payment_status" :required true}
+         (for [status ["Unpaid" "Paid" "Partial payment" "Overdue" "Pending"
+                       "Failed" "Canceled" "Refunded"]]
+           [:option {:value status :selected (if (= status "Unpaid") "selected" nil)} status])]]]]
 
-     [:button {:type "submit"} "Submit"]]]))
-
+       [:button {:type "submit"} "Submit"]]]))
 
 (defn settings-component
-  [account {:keys [error]}]
+  [account {:keys [error modal]}]
   (h/html
    [:div#settings-form
     [:h2 "Profile"]
@@ -295,15 +321,15 @@
       [:p "Password:"]
       [:p "Created at:"]]
 
-      [:div {:class "col-span-3"}
-       [:p [:i (:accounts/email account)]] 
-       [:p [:i (:accounts/password account)]] 
-       [:p [:i (parse-and-format-date (:accounts/created_at account))]]]]]
+     [:div {:class "col-span-3"}
+      [:p [:i (:accounts/email account)]]
+      [:p [:i (:accounts/password account)]]
+      [:p [:i (parse-and-format-date (:accounts/created_at account))]]]]]
 
    [:div
     [:h2 "Update Password"]
     (when error
-      [:div.error-message
+      [:div {:class "error-message flex items-center"}
        [:img {:src "/icons/error.svg" :alt "Error message"}]
        [:p error]])
 
@@ -323,11 +349,17 @@
       [:input {:class "password" :type "password" :name "verify-password" :value ""}]
       [:input {:type "checkbox" :id "verify-visibility" :class "visibility toggle-password" :onclick "togglePassword(this)"}]
       [:label {:for "verify-visibility" :class "visibility-icon hidden"}]]
-     [:button {:type "submit" :hx-post "/update-password" :hx-target "#dashboard-content"} "Update Password"]]]
+     [:button {:type "submit"
+               :hx-post "/update-password"
+               :hx-target "#dashboard-content"} "Update Password"]]]
+   (when modal
+     [:dialog {:open true}
+      [:p "Your password has been updated succesfully"]
+      [:button {:onclick "closeModal(this)"} "Close"]])
 
    [:div {:id "warning-sign"}
-    [:div 
-     [:p "Are you sure you want to delete your account?"] 
+    [:div
+     [:p "Are you sure you want to delete your account?"]
      [:p "This action is permanent and cannot be undone."]
      [:p "Deletes all user data, i.e. user account and all connected transactions."]]
     [:div {:class "checkbox"}
@@ -338,19 +370,42 @@
 (defn support-component
   []
   (h/html
-   [:div
+   [:div {:id "faq-section"}
     [:h2 "Frequently Asked Questions"]
     [:ul
-     [:li [:strong "what features does this app have?"] [:p "In this amazing webapp you can add, edit and delete your financial transactions."]]
-     [:li [:strong "What type of financial transactions are supported?"] [:p "Only invoices and expenses are supported."]]
-     [:li [:strong "How do I reset my password?"] [:p "Go to the settings tab, and follow the steps on the bottom to update your password."]]
-     [:li [:strong "Will this webapp have more features?"] [:p "No."]]]]
+     [:li
+      [:p "What features does this app have?"]
+      [:p "In this amazing webapp, you can add, edit, and delete your financial transactions."]]
+     [:li
+      [:p "What type of financial transactions are supported?"]
+      [:p "Only invoices and expenses are supported."]]
+     [:li
+      [:p "How do I reset my password?"]
+      [:p "Go to the settings tab, and follow the steps at the bottom to update your password."]]
+     [:li
+      [:p "Will this webapp have more features?"]
+      [:p "No, we currently do not plan to add additional features."]]
+     [:li
+      [:p "Can I export my financial data?"]
+      [:p "No, the webapp doesn't have any export functionality."]]
+     [:li
+      [:p "Can I use the webapp on mobile devices?"]
+      [:p "No, this webapp has been designed for 1920x1080 desktop viewport."]]
+     [:li
+      [:p "What should I do if I encounter an error?"]
+      [:p "If you experience any issues, raise an issue on github: "] 
+      [:a {:href "https://github.com/kevin-rn/Clojure-FinAdmin"} "https://github.com/kevin-rn/Clojure-FinAdmin"]]
+     [:li
+      [:p "Do I need an account to use the webapp?"]
+      [:p "Yes, otherwise you wouldn't be able to access the dashboard and see this page."]]]]
+
 
    [:div
     [:h2 "Feedback"]
     [:p "We value your feedback. Please let us know how we can improve."]
     [:textarea {:placeholder "Your feedback..." :name "description" :class "w-full h-48 resize-none"}]
-    [:button "Submit Feedback"]]))
+    [:button {:type "submit" :disabled true} "Submit Feedback"]
+    [:div {:id "warning-sign"} [:p  "*This feature has not been implemented."]]]))
 
 (defn dashboard
   [email]
