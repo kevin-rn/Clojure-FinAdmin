@@ -154,7 +154,7 @@ input[type="checkbox"]:not(.visibility):checked::before {
     background-repeat: no-repeat;
     cursor: pointer;
     background-image: url("/icons/visibility.svg");
-    filter: var(--focus-filter-color);
+    filter: var(--base-filter-clr);
 }
 
 .visibility-icon.visible {
@@ -202,16 +202,27 @@ input[type="checkbox"]:not(.visibility):checked::before {
 /* Table styling */
 table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
+
+    thead th {
+        position: sticky;
+        top: 0px;
+        z-index: 2;
+       
+    }
 
     th {
         background-color: var(--primary-txt-clr);
         padding: 5px;
+        border-bottom: 2px solid;
     }
 
     td {
         padding: 5px;
     }
+
+
 }
 
 table tr:nth-child(even) td {
@@ -234,4 +245,33 @@ table tr:nth-child(even) td {
 #transaction-details {
     margin-bottom: 10px;
     margin-top: 5px;
+}
+
+.sort-icon {
+    display: inline-block;
+    position: absolute;
+    width: 2em;
+    height: auto;
+    z-index: 2;
+}
+
+#sort-btn-initial,
+#sort-btn-asc,
+#sort-btn-desc {
+    position: relative;
+    top: 0;
+    right: 0;
+    transform: translate(-10%, -15%)  rotate(180deg);
+    width: 2em;
+    height: auto;
+    filter: var(--grey-filter-clr);
+}
+
+
+#sort-btn-initial {
+    filter: var(--base-filter-clr);
+}
+
+#sort-btn-desc {
+    transform: translate(-10%, -15%);
 }

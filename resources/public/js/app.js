@@ -68,12 +68,18 @@ function closeModal(button) {
   document.getElementById('popup').remove();
 }
 
-function sortTable(n) {
+function sortTable(n, th) {
   // https://www.w3schools.com/howto/howto_js_sort_table.asp
   var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
   table = document.getElementById("transaction-table");
   switching = true;
-  dir = "asc";
+  dir = th.getAttribute("data-sort") === "asc" ? "desc" : "asc";
+  
+  // Reset all headers' icons
+  document.querySelectorAll(".sort-icon").forEach(icon => {
+    icon.innerHTML = '';
+  });
+
   while (switching) {
     switching = false;
     rows = table.rows;
@@ -81,12 +87,13 @@ function sortTable(n) {
       shouldSwitch = false;
       x = rows[i].getElementsByTagName("TD")[n];
       y = rows[i + 1].getElementsByTagName("TD")[n];
-      if (dir == "asc") {
+
+      if (dir === "asc") {
         if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
           shouldSwitch = true;
           break;
         }
-      } else if (dir == "desc") {
+      } else if (dir === "desc") {
         if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
           shouldSwitch = true;
           break;
@@ -96,15 +103,20 @@ function sortTable(n) {
     if (shouldSwitch) {
       rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
       switching = true;
-      switchcount ++;
+      switchcount++;
     } else {
-      if (switchcount == 0 && dir == "asc") {
-        dir = "desc";
+      if (switchcount === 0) {
+        dir = dir === "asc" ? "desc" : "asc";
         switching = true;
       }
     }
   }
+  
+  // Update the clicked column header's icon
+  th.querySelector(".sort-icon").innerHTML = `<img src="/icons/dropdown.svg" id="sort-btn-${dir}" alt="Sort ${dir}">`;
+  th.setAttribute("data-sort", dir);
 }
+
 
 function toggleEditFields(button) {
   var inputs = document.querySelectorAll('input');

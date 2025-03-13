@@ -130,7 +130,7 @@ input {
     background-repeat: no-repeat;
     cursor: pointer;
     background-image: url("/icons/visibility.svg");
-    filter: var(--focus-filter-color);
+    filter: var(--base-filter-clr);
     z-index: 2;
 }
 
@@ -200,6 +200,6 @@ button:active, button:focus {
 
     > img {
         flex-shrink: 0;
-        filter: var(--hover-filter-color);
+        filter: var(--accent-filter-clr);
     }
 }

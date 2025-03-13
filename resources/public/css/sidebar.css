@@ -115,7 +115,7 @@ header {
 #sidebar a:hover img, 
 #sidebar .dropdown-btn:hover img, 
 #toggle-btn:hover img {
-    filter: var(--hover-filter-color);
+    filter: var(--accent-filter-clr);
 }
 
 #sidebar a:hover::before {
@@ -138,7 +138,7 @@ header {
 }
 
 #sidebar li.selected a img {
-    filter: var(--focus-filter-color);
+    filter: var(--base-filter-clr);
 }
 
 #sidebar li.selected a::before {

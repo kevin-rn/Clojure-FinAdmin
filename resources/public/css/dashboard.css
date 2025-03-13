@@ -99,6 +99,6 @@ main {
         background-image: url('/icons/item.svg');
         background-size: contain;
         background-repeat: no-repeat;
-        filter: var(--focus-filter-color);
+        filter: var(--base-filter-clr);
     }
 }

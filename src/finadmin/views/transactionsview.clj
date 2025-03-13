@@ -9,15 +9,17 @@
 (defn transactions-list
   [transactions {:keys [modal]}]
   (h/html
-   [:table {:class "w-full border-collapse" :id "transaction-table"}
-    [:thead {:class "border-b-2 sticky top-0 z-2"}
+   [:table {:class "w-full" :id "transaction-table"}
+    [:thead
      [:tr
-      [:th {:class "p-3 text-sm font-semibold tracking-wide text-left" :onclick "sortTable(0)"} "Date"]
-      [:th {:class "p-3 text-sm font-semibold tracking-wide text-left" :onclick "sortTable(1)"} "Amount"]
-      [:th {:class "p-3 text-sm font-semibold tracking-wide text-left" :onclick "sortTable(2)"} "Currency"]
-      [:th {:class "p-3 text-sm font-semibold tracking-wide text-left" :onclick "sortTable(3)"} "Type"]
-      [:th {:class "p-3 text-sm font-semibold tracking-wide text-left" :onclick "sortTable(4)"} "Description"]
-      [:th {:class "p-3 text-sm font-semibold tracking-wide text-left" :onclick "sortTable(5)"} "Payment method"]]]
+      [:th {:class "font-semibold text-left" :onclick "sortTable(0, this)"} "Date" 
+       [:span.sort-icon
+        [:img {:src "/icons/dropdown.svg" :id "sort-btn-initial" :alt "Sort asc"}]]]
+      [:th {:class "font-semibold text-left" :onclick "sortTable(1, this)"} "Amount" [:span.sort-icon]]
+      [:th {:class "font-semibold text-left" :onclick "sortTable(2, this)"} "Currency" [:span.sort-icon]]
+      [:th {:class "font-semibold text-left" :onclick "sortTable(3, this)"} "Type" [:span.sort-icon ""]]
+      [:th {:class "font-semibold text-left" :onclick "sortTable(4, this)"} "Description" [:span.sort-icon]]
+      [:th {:class "font-semibold text-left" :onclick "sortTable(5, this)"} "Payment method" [:span.sort-icon]]]]
 
     (if (empty? transactions)
       [:tbody
@@ -147,7 +149,7 @@
 
 
 (defn transaction-details
-  [transaction]
+  [transaction {:keys [modal]}]
   (let [transaction-type (:transactions/transaction_type transaction)]
     (h/html
      [:div
@@ -155,9 +157,9 @@
       [:form
        [:table#transaction-details
         [:thead {:class "border-b-2 sticky top-0 z-2"}
-         [:tr 
-          [:th {:class "p-3 text-sm font-semibold tracking-wide text-left"} "Field"]
-          [:th {:class "p-3 text-sm font-semibold tracking-wide text-left"} "Value"]]]
+         [:tr
+          [:th {:class "font-semibold text-left"} "Field"]
+          [:th {:class "font-semibold text-left"} "Value"]]]
         [:tbody
          [:tr
           [:td "Transaction Date"]
@@ -174,11 +176,11 @@
          [:tr
           [:td "Currency"]
           [:td [:div.custom-select
-                [:select {:name "currency" 
-                          :required true 
+                [:select {:name "currency"
+                          :required true
                           :disabled true}
                  (for [currency currencies]
-                   [:option {:value currency 
+                   [:option {:value currency
                              :selected (if (= currency (:transactions/currency transaction)) "selected" nil)} currency])]
                 [:span.custom-select-arrow]]]]
          [:tr
@@ -187,16 +189,16 @@
          [:tr
           [:td "Description"]
           [:td [:textarea {:name "description"
-                           :class "w-full h-48 resize-none" 
+                           :class "w-full h-48 resize-none"
                            :disabled true} (:transactions/description transaction)]]]
          [:tr
           [:td "Payment Method"]
           [:td  [:div.custom-select
-                 [:select {:name "payment_method" 
-                           :required true 
+                 [:select {:name "payment_method"
+                           :required true
                            :disabled true}
                   (for [method payment-methods]
-                    [:option {:value method 
+                    [:option {:value method
                               :selected (if (= method (:transactions/payment_method transaction)) "selected" nil)} method])]
                  [:span.custom-select-arrow]]]]
 
@@ -205,20 +207,27 @@
            :invoice (invoice-details transaction)
            (throw (IllegalArgumentException. (str "Invalid transaction type: " transaction-type))))]]
 
-      [:div {:class "flex justify-between"}
-       [:button {:type "button"
-                 :hx-post (str "/delete-transaction/" (:transactions/transaction_id transaction) "/" transaction-type)
-                 :hx-target "#transactions-container"
-                 :hx-trigger "click"} (str "Delete " transaction-type) " transaction"]
-       [:button {:type "submit"
-                 :id "modify-transaction-btn"
-                 :hx-post (str "/modify-transaction/" (:transactions/transaction_id transaction) "/" transaction-type)
-                 :hx-target "#transactions-container"
-                 :hx-trigger "click"
-                 :disabled true} (str "Update " transaction-type) " transaction"]
-       [:div {:class "checkbox"}
-        [:input {:type "checkbox" :onclick "toggleEditFields(this)"}]
-        [:i  "Enable Editing"]]]]])))
+       [:div {:class "flex justify-between"}
+        [:button {:type "button"
+                  :hx-post (str "/delete-transaction/" (:transactions/transaction_id transaction) "/" transaction-type)
+                  :hx-target "#transactions-container"
+                  :hx-trigger "click"} (str "Delete " transaction-type) " transaction"]
+        [:button {:type "submit"
+                  :id "modify-transaction-btn"
+                  :hx-post (str "/modify-transaction/" (:transactions/transaction_id transaction) "/" transaction-type)
+                  :hx-target "#transactions-container"
+                  :hx-trigger "click"
+                  :disabled true} (str "Update " transaction-type) " transaction"]
+        [:div {:class "checkbox"}
+         [:input {:type "checkbox" :onclick "toggleEditFields(this)"}]
+         [:i  "Enable Editing"]]]]
+
+      (when modal
+        [:div#popup
+         [:div.backdrop]
+         [:dialog {:class "popup" :open true}
+          [:p "Transaction has been succesfully updated!"]
+          [:button {:onclick "closeModal(this)"} "Close"]]])])))
 
 (defn transactions-component
   [transactions key_map]

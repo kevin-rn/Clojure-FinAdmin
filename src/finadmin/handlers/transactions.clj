@@ -23,7 +23,7 @@
         transaction (get-transaction-by-id transaction-id transaction-type)]
     {:status 200
      :headers {"Content-Type" "text/html"}
-     :body (str (views/transaction-details transaction))}))
+     :body (str (views/transaction-details transaction {}))}))
 
 (defn add-expense
   [request]
@@ -51,7 +51,7 @@
     (let [transaction (get-transaction-by-id transaction-id transaction-type)]
       {:status 200
        :headers {"Content-Type" "text/html"}
-       :body (str (views/transaction-details transaction))})))
+       :body (str (views/transaction-details transaction {:modal true}))})))
 
 (defn delete-transaction
   [request]
