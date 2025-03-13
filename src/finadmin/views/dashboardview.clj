@@ -66,10 +66,13 @@
      [:button {:type "submit"
                :hx-post "/update-password"
                :hx-target "#dashboard-content"} "Update Password"]]]
+
    (when modal
-     [:dialog {:class "popup" :open true}
-      [:p "Your password has been updated succesfully"]
-      [:button {:onclick "closeModal(this)"} "Close"]])
+     [:div#popup
+      [:div.backdrop]
+      [:dialog {:class "popup" :open true}
+       [:p "Your password has been updated succesfully!"]
+       [:button {:onclick "closeModal(this)"} "Close"]]])
 
    [:div {:id "warning-sign"}
     [:div

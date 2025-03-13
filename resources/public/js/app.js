@@ -63,6 +63,9 @@ function toggleAcknowledge(button) {
   document.getElementById('delete-account-btn').disabled = !button.checked
 }
 
+
 function closeModal(button) {
-  button.closest('dialog').close()
+  button.closest('dialog').close();
+  document.getElementById('popup').remove()
+  
 }

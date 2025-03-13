@@ -50,14 +50,14 @@
 
 (defn sign-up-account
   [request]
-  (let [{:keys [email password repeat-password]} (get-in request [:params])]
+  (let [{:keys [email password verify-password]} (get-in request [:params])]
     (cond
-      (or (empty? email) (empty? password) (empty? repeat-password))
+      (or (empty? email) (empty? password) (empty? verify-password))
       {:status 200
        :headers {"Content-Type" "text/html"}
        :body (str (authviews/sign-up {:error "All fields are required!"}))}
 
-      (not= password repeat-password)
+      (not= password verify-password)
       {:status 200
        :headers {"Content-Type" "text/html"}
        :body (str (authviews/sign-up {:error "Passwords do not match!"}))}

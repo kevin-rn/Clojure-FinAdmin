@@ -7,6 +7,31 @@ main {
     background-color: var(--box-clr);
 }
 
+table {
+    width: 100%;
+    border-collapse: collapse;
+
+    th {
+        background-color: var(--primary-txt-clr);
+        padding: 5px;
+    }
+
+    td {
+        padding: 5px;
+    }
+}
+
+table tr:nth-child(even) td {
+    background-color: var(--box-clr);
+}
+
+table tr:hover {
+    background-color: var(--accent-clr);
+    td {
+        background-color: unset;
+    }
+}
+
 #dashboard-content {
     margin-top: 10px;
     height: 85vh;
@@ -16,7 +41,7 @@ main {
     margin-bottom: 5px;
 }
 
-#dashboard-content > div {
+#dashboard-content > div:not(#popup) {
     margin-bottom: 20px;
     box-shadow: 0 4px 8px 0 var(--box-shadow-clr), 0 6px 20px 0 var(--box-shadow-clr);
     padding: 25px;

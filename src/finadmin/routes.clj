@@ -28,8 +28,11 @@
 
          ;; Interaction
          ["/filter-transactions" {:get transactions/filter-transactions}]
+         ["/transaction/:transaction-id/type/:transaction-type" {:get transactions/transaction-details}]
          ["/add-expense" {:post transactions/add-expense}]
          ["/add-invoice" {:post transactions/add-invoice}]
+         ["/modify-transaction/:transaction-id/type/:transaction-type" {:get transactions/modify-transaction}]
+         ["/delete-transaction/:transaction-id/type/:transaction-type" {:get transactions/delete-transaction}]
          ["/update-password" {:post auth/update-password}]
          ["/delete-account" {:post auth/delete-account}]]
          ))

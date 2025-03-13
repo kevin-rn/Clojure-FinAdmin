@@ -31,10 +31,9 @@
     (throw (IllegalArgumentException. "Expected a java.sql.Timestamp object"))))
 
 (defn transactions-list
-  [transactions]
+  [transactions {:keys [modal]}]
   (h/html
    [:table {:class "w-full border-collapse"}
-
     [:thead {:class "border-b-2 sticky top-0 z-10"}
      [:tr
       [:th {:class "p-3 text-sm font-semibold tracking-wide text-left"} "Date"]
@@ -47,19 +46,74 @@
     (if (empty? transactions)
       [:tbody
        [:tr {:class "text-center"}
-        [:td {:colspan "6" :class "p-3"} [:i {:class "select-none"} "No Transactions stored"]]]]
+        [:td {:colspan "6"} [:i.select-none "No Transactions stored"]]]]
       [:tbody
-       (for [{:transactions/keys [transaction_date amount currency transaction_type description payment_method]} transactions]
-         [:tr {:class "border-b"}
-          [:td {:class "p-3"} (parse-and-format-date transaction_date)]
-          [:td {:class "p-3"} amount]
-          [:td {:class "p-3"} currency]
-          [:td {:class "p-3"} transaction_type]
-          [:td {:class "p-3"} description]
-          [:td {:class "p-3"} payment_method]])])]))
+       (for [{:transactions/keys [transaction_id transaction_date amount currency transaction_type description payment_method]} transactions]
+         [:tr {:class "border-b"
+               :hx-get (str "/transaction/" transaction_id "/type/" transaction_type)
+               :hx-target "#transactions-container"
+               :hx-trigger "click"}
+          [:td (parse-and-format-date transaction_date)]
+          [:td amount]
+          [:td currency]
+          [:td transaction_type]
+          [:td description]
+          [:td payment_method]])])]
+
+   (when modal
+     [:div#popup
+      [:div.backdrop]
+      [:dialog {:class "popup" :open true}
+       [:p "Transaction has been deleted succesfully!"]
+       [:button {:onclick "closeModal(this)"} "Close"]]])))
+
+(defn expense-details 
+  [transaction]
+  (h/html
+   [:tr [:td "Expense Type"] [:td (:expenses/expense_type transaction)]]
+   [:tr [:td "Reimbursement Status"] [:td (:expenses/reimbursement_status transaction)]]
+   [:tr [:td "Business Purpose"] [:td (:expenses/business_purpose transaction)]]
+   [:tr [:td "Approval Status"] [:td (:expenses/approval_status transaction)]]
+   [:tr [:td "Expense Date"] [:td (:expenses/expense_date transaction)]]))
+
+(defn invoice-details 
+  [transaction]
+  (h/html
+   [:tr [:td "Invoice Number"] [:td (:invoices/invoice_number transaction)]]
+   [:tr [:td "Vendor Name"] [:td (:invoices/vendor_name transaction)]]
+   [:tr [:td "PO Number"] [:td (:invoices/po_number transaction)]]
+   [:tr [:td "VAT Code"] [:td (:invoices/vat_code transaction)]]
+   [:tr [:td "Payment Terms"] [:td (:invoices/payment_terms transaction)]]
+   [:tr [:td "Due Date"] [:td (:invoices/due_date transaction)]]
+   [:tr [:td "Payment Status"] [:td (:invoices/payment_status transaction)]]))
+
+(defn transaction-details
+  [transaction]
+  (let [transaction-type (:transactions/transaction_type transaction)]
+    (h/html
+     [:div
+      [:h2 "Transaction Details"]
+      [:table
+       [:tr [:th "Field"] [:th "Value"]]
+       [:tr [:td "Date"] [:td (:transactions/transaction_date transaction)]]
+       [:tr [:td "Amount"] [:td (:transactions/amount transaction)]]
+       [:tr [:td "Currency"] [:td (:transactions/currency transaction)]]
+       [:tr [:td "Type"] [:td (:transactions/transaction_type transaction)]]
+       [:tr [:td "Description"] [:td (:transactions/description transaction)]]
+       [:tr [:td "Payment Method"] [:td (:transactions/payment_method transaction)]]
+       (condp = (keyword transaction-type)
+         :expense (expense-details transaction)
+         :invoice (invoice-details transaction)
+         (throw (IllegalArgumentException. (str "Invalid transaction type: " transaction-type))))]
+
+      [:div
+       [:button {:type "button"
+                 :hx-get (str "/delete-transaction/" (:transactions/transaction_id transaction) "/type/" transaction-type)
+                 :hx-target "#transactions-container"
+                 :hx-trigger "click"} (str "Delete " transaction-type) " transaction"]]])))
 
 (defn transactions-component
-  [transactions]
+  [transactions key_map]
   (h/html
    [:div {:id "transactions-container" :class "h-[80vh] flex flex-col"}
     [:h2 "Transaction History"]
@@ -78,7 +132,7 @@
       [:span {:class "custom-select-arrow"}]]]
 
     [:div {:class "flex-1 overflow-auto mt-8" :id "transaction-list"}
-     (transactions-list transactions)]]))
+     (transactions-list transactions key_map)]]))
 
 (defn expenses-component
   [{:keys [modal]}]
@@ -86,11 +140,14 @@
    [:div {:id "expense-form"}
     [:h2 "Add Expense"]
     (when modal
-      [:dialog {:class "popup" :open true}
-       [:p "Invoice has been registered succesfully!"]
-       [:button {:onclick "closeModal(this)"} "Close"]])
+      [:div#popup
+       [:div.backdrop]
+       [:dialog {:class "popup" :open true}
+        [:p "Expense has been registered succesfully!"]
+        [:button {:onclick "closeModal(this)"} "Close"]]])
     [:form {:class "grid grid-cols-3 gap-4"
-            :hx-post "/add-expense"}
+            :hx-post "/add-expense"
+            :hx-target "#expense-form"}
 
      ;; Expense Details
      [:fieldset {:class "col-span-3 border p-4 rounded"}
@@ -162,9 +219,11 @@
    [:div {:id "invoice-form"}
     [:h2 "Add Invoice"]
     (when modal
-      [:dialog {:class "popup" :open true}
-       [:p "Invoice has been registered succesfully!"]
-       [:button {:onclick "closeModal(this)"} "Close"]])
+      [:div#popup
+       [:div.backdrop]
+       [:dialog {:class "popup" :open true}
+        [:p "Invoice has been registered succesfully!"]
+        [:button {:onclick "closeModal(this)"} "Close"]]])
     [:form {:class "grid grid-cols-3 gap-4"
             :hx-post "/add-invoice"
             :hx-target "#invoice-form"}

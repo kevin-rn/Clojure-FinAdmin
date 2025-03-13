@@ -39,19 +39,19 @@
         transactions (get-transactions-by-email email "all")]
     {:status 200
      :headers {"Content-Type" "text/html"}
-     :body (str (transviews/transactions-component transactions))}))
-
-(defn invoices
-  [_]
-  {:status 200
-   :headers {"Content-Type" "text/html"}
-   :body (str (transviews/invoices-component {}))})
+     :body (str (transviews/transactions-component transactions {}))}))
 
 (defn expenses
   [_]
   {:status 200
    :headers {"Content-Type" "text/html"}
    :body (str (transviews/expenses-component {}))})
+
+(defn invoices
+  [_]
+  {:status 200
+   :headers {"Content-Type" "text/html"}
+   :body (str (transviews/invoices-component {}))})
 
 (defn settings
   [request]

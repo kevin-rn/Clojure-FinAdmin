@@ -18,6 +18,12 @@
   "INSERT INTO expenses (transaction_id, expense_type, reimbursement_status, business_purpose, approval_status, expense_date) 
    VALUES (?, ?, ?, ?, ?, ?)")
 
+(def get-expense-transaction-query
+  "SELECT * FROM transactions t INNER JOIN expenses e ON t.transaction_id = e.transaction_id WHERE t.transaction_id = ?")
+
+(def get-invoice-transaction-query
+  "SELECT * FROM transactions t INNER JOIN invoices i ON t.transaction_id = i.transaction_id WHERE t.transaction_id = ?")
+
 ;; Transactions
 (defn add-expense-db
   "Adds a new expense entry to the database, including transaction and expense details.
@@ -26,7 +32,7 @@
    - email: A string representing the email of the account creating the expense.
    - expense-details: A map containing the details of the expens."
   [email expense-details]
-  (jdbc/with-transaction [dc database-connection]
+  (jdbc/with-transaction [dc database-connection] 
     (let [transaction-result (jdbc/execute! dc
                                             [insert-transaction-query
                                              (Double. (:amount expense-details))
@@ -52,7 +58,7 @@
      - email: A string representing the email of the account creating the invoice.
      - invoice-details: A map containing the details of the invoice."
   [email invoice-details] 
-  ((jdbc/with-transaction [dc database-connection]
+  (jdbc/with-transaction [dc database-connection]
      (let [transaction-result (jdbc/execute! dc [insert-transaction-query
                                                  (Double. (:amount invoice-details))
                                                  (:currency invoice-details)
@@ -69,80 +75,7 @@
                               (:vat_code invoice-details)
                               (:payment_terms invoice-details)
                               (java.time.LocalDate/parse (:due_date invoice-details))
-                              (:payment_status invoice-details)])))))
-
-(defn build-update-query
-  "Generates an UPDATE SQL query and corresponding values for fields that are not nil.
-  
-     Parameters:
-     - table-name: A string representing the name of the table to update (e.g., 'invoices' or 'expenses').
-     - id-field: A string representing the name of the ID field for the table (e.g., 'invoice_id' or 'expense_id').
-     - updates: A map containing the fields and their new values to update in the table.
-     
-     Returns:
-     - A vector containing the SQL query string and its corresponding values. If no updates are found, returns nil."
-  [table-name id-field updates]
-  (let [fields (->> updates
-                    (remove #(nil? (second %)))
-                    (map #(str (name (first %)) " = ?"))
-                    (interpose ", ")
-                    (apply str))
-        values (->> updates
-                    (filterv some?)
-                    (map second)
-                    (vec))]
-    (when (not-empty fields)
-      [(str "UPDATE " table-name " SET " fields " WHERE " id-field " = ?")
-       (into values [(:id updates)])])))
-
-
-(defn modify-invoice
-  "Modifies an existing invoice in the database.
-  
-     Parameters:
-     - invoice-id: A unique identifier for the invoice to update.
-     - updates: A map containing the fields to update and their new values."
-  [invoice-id updates]
-  (let [updates-with-id (assoc updates :id invoice-id)
-        [query params] (build-update-query "invoices" "invoice_id" updates-with-id)]
-    (when query
-      (jdbc/execute-one! database-connection [query params]))))
-
-
-(defn modify-expense
-  "Modifies an existing expense in the database.
-  
-     Parameters:
-     - expense-id: A unique identifier for the expense to update.
-     - updates: A map containing the fields to update and their new values."
-  [expense-id updates]
-  (let [updates-with-id (assoc updates :id expense-id)
-        [query params] (build-update-query "expenses" "expense_id" updates-with-id)]
-    (when query
-      (jdbc/execute-one! database-connection [query params]))))
-
-
-(defn delete-invoice
-  "Deletes an invoice and its associated transaction from the database.
-  
-     Parameters:
-     - invoice-id: A unique identifier for the invoice to delete."
-  [invoice-id]
-  (jdbc/with-transaction [dc database-connection]
-    (let [transaction-id (:transaction_id (jdbc/execute-one! dc ["SELECT transaction_id FROM invoices WHERE invoice_id = ?" invoice-id]))]
-      (jdbc/execute-one! dc ["DELETE FROM invoices WHERE invoice_id = ?" invoice-id])
-      (jdbc/execute-one! dc ["DELETE FROM transactions WHERE transaction_id = ?" transaction-id]))))
-
-(defn delete-expense
-  "Deletes an expense and its associated transaction from the database.
-  
-     Parameters:
-     - expense-id: A unique identifier for the expense to delete."
-  [expense-id]
-  (jdbc/with-transaction [dc database-connection]
-    (let [transaction-id (:transaction_id (jdbc/execute-one! dc ["SELECT transaction_id FROM expenses WHERE expense_id = ?" expense-id]))]
-      (jdbc/execute-one! dc ["DELETE FROM expenses WHERE expense_id = ?" expense-id])
-      (jdbc/execute-one! dc ["DELETE FROM transactions WHERE transaction_id = ?" transaction-id]))))
+                              (:payment_status invoice-details)]))))
 
 (defn get-transactions-by-email
   "Retrieves transactions for a specific user based on their email and optional transaction type.
@@ -156,7 +89,74 @@
   [email transaction-type]
   (let [query (cond
                 (= transaction-type "all")  ["SELECT * FROM transactions WHERE account_email = ?" email]
-                (some #{"invoice" "expense"} [transaction-type]) ["SELECT * FROM transactions WHERE account_email = ? AND transaction_type = ?" email transaction-type]
+                (some #{"invoice" "expense"} [transaction-type])
+                ["SELECT * FROM transactions WHERE account_email = ? AND transaction_type = ?" email transaction-type]
                 :else (throw (ex-info "Invalid transaction type" {:type transaction-type})))]
     (jdbc/execute! database-connection query)))
 
+(defn get-transaction-by-id
+  [transaction-id transaction-type]
+  (let [query (case (keyword transaction-type)
+                :expense get-expense-transaction-query
+                :invoice get-invoice-transaction-query
+                (throw (IllegalArgumentException. "Invalid transaction type")))
+        transaction-id (Integer. transaction-id)]
+    (jdbc/execute-one! database-connection [query transaction-id])))
+
+(defn build-update-query
+  "Generates an UPDATE SQL query and corresponding values for fields that are not nil.
+  
+     Parameters:
+     - table-name: A string representing the name of the table to update (e.g., 'invoices' or 'expenses').
+     - updates: A map containing the fields and their new values to update in the table.
+     
+     Returns:
+     - A vector containing the SQL query string and its corresponding values. If no updates are found, returns nil."
+  [table-name updates]
+  (let [valid-updates (->> updates
+                           (remove #(nil? (second %)))
+                           (map #(str (name (first %)) " = ?"))
+                           (interpose ", ")
+                           (apply str))
+        values (->> updates
+                    (filterv (comp some? second))
+                    (map second)
+                    (vec))]
+    (when (seq valid-updates)
+      [(str "UPDATE " table-name " SET " valid-updates " WHERE transaction_id = ?")
+       (into values [(:id updates)])])))
+
+(defn modify-transaction-db
+  "Modifies an existing record in the database.
+  
+     Parameters:
+     - record-id: A unique identifier for the specific transaction record to modify.
+     - transaction-type: The type of transaction to modify, either 'expense' or 'invoice'.
+     - updates: A map containing the fields to update and their new values."
+  [record-id transaction-type updates]
+  (jdbc/with-transaction [dc database-connection]
+    (let [table (case transaction-type
+                  "expense" "expenses"
+                  "invoice" "invoices")]
+      (if (and table record-id (seq updates))
+        (let [[query params] (build-update-query table updates)]
+          (jdbc/execute! dc [query params]))
+        (throw (ex-info "Invalid transaction type or updates." {:transaction-type transaction-type :updates updates}))))))
+
+(defn delete-transaction-db
+  "Deletes a record (expense or invoice) and its associated transaction from the database.
+  
+     Parameters:
+     - :transaction-id: A unique identifier for the specific transaction record to delete.
+     - transaction-type: The type of transaction to delete, either 'expense' or 'invoice'.
+  
+     Returns `{:success true} `if deleted, otherwise `{:success false} `. "
+  [transaction-id transaction-type]
+  (jdbc/with-transaction [dc database-connection]
+    (let [table (case transaction-type
+                  "expense" "expenses"
+                  "invoice" "invoices")
+          transaction-id (Integer/parseInt transaction-id)
+          deleted_row_1 (:next.jdbc/update-count (jdbc/execute-one! dc [(str "DELETE FROM " table " WHERE transaction_id = ?") transaction-id]))
+          deleted_row_2 (:next.jdbc/update-count (jdbc/execute-one! dc ["DELETE FROM transactions WHERE transaction_id = ?" transaction-id]))]
+      {:success (and (pos? deleted_row_1) (pos? deleted_row_2))})))
