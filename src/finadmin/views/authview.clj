@@ -74,7 +74,7 @@
           (include-js "https://code.jquery.com/jquery-3.6.0.min.js")
           [:script {:src "/js/app.js" :defer true}]
           [:link {:href "https://fonts.googleapis.com/css?family=Montserrat:400,900" :rel "stylesheet"}]
-          [:link {:rel "icon" :href "/logo/favicon.ico" :type "image/x-icon"}]]
+          [:link {:rel "shortcut icon" :href "/favicon.ico" :type "image/x-icon"}]]
          [:body {:class "bg-[url(../img/login-background.png)] login-page"}
           [:div {:class "flex h-screen"}
            [:div {:class "w-2/3 flex items-center justify-center"}

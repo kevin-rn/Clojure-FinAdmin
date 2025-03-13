@@ -1,5 +1,6 @@
 @import url("global.css");
 
+/* Popup dialog modal styling */
 dialog.popup {
     position: fixed;
     top: 50%;
@@ -11,7 +12,7 @@ dialog.popup {
     width: 30%;
     max-width: 400px;
     text-align: center;
-    z-index: 12;
+    z-index: 5;
     border-color: var(--primary-txt-clr)
 }
 
@@ -22,9 +23,11 @@ dialog.popup {
     width: 100vw;
     height: 100vh;
     background: rgba(0, 0, 0, 0.5);
-    z-index: 11;
+    z-index: 4;
   }
 
+
+/* Form Select options styling */
 select {
     padding: 0.5em 4em 0.5em 1em;
     background: var(--select-clr);
@@ -76,6 +79,7 @@ select {
 }
 
 
+/* Form input styling */
 #invoice-form fieldset, #expense-form fieldset {
     margin-top: 10px;
     margin-bottom: 10px;
@@ -89,7 +93,7 @@ select {
     }
 }
 
-
+/* Checkbox styling */
 /* https://moderncss.dev/pure-css-custom-checkbox-style/ */
 input[type="checkbox"]:not(.visibility) {
     -webkit-appearance: none;
@@ -138,6 +142,7 @@ input[type="checkbox"]:not(.visibility):checked::before {
     }
 }
 
+/* Visibility toggle styling (show password) */
 .visibility {
     display: none;
 }
@@ -160,6 +165,7 @@ input[type="checkbox"]:not(.visibility):checked::before {
     background-image: url("/icons/visibility.svg");
 }
 
+/* Error message styling */
 .error-message {
     margin-top: 10px;
     border-radius: 10px;
@@ -191,4 +197,41 @@ input[type="checkbox"]:not(.visibility):checked::before {
 
 #warning-sign > div {
     margin-bottom: 5px;
+}
+
+/* Table styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+
+    th {
+        background-color: var(--primary-txt-clr);
+        padding: 5px;
+    }
+
+    td {
+        padding: 5px;
+    }
+}
+
+table tr:nth-child(even) td {
+    background-color: var(--box-clr);
+}
+
+#transaction-table tr:hover {
+    background-color: var(--accent-clr);
+    cursor: pointer;
+    td {
+        background-color: unset;
+    }
+}
+
+#transaction-table tr:focus, #transaction-table tr:active {
+    background-color: var(--secondary-txt-clr);
+    cursor: pointer;
+}
+
+#transaction-details {
+    margin-bottom: 10px;
+    margin-top: 5px;
 }

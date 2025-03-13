@@ -1,47 +1,23 @@
 (ns finadmin.views.transactionsview
   (:require
-   [hiccup2.core :as h])  
-  (:import
-   [java.sql Timestamp]
-   [java.time.format DateTimeFormatter]
-   [java.util Locale]))
-
-
-(def currencies ["ARS" "AUD" "BHD" "BRL" "CAD" "CHF"
-                 "CNY" "COP" "CZK" "DKK" "EGP" "EUR"
-                 "GBP" "HKD" "ILS" "INR" "IDR" "JPY"
-                 "KRW" "KWD" "MAD" "MXN" "MYR" "NOK"
-                 "PEN" "PHP" "PLN" "RUB" "SAR" "SEK"
-                 "SGD" "THB" "TRY" "USD" "VND" "ZAR" "NZD"])
-
-(def expense-types ["Fixed Expenses" "Variable Expenses" "Operating Expenses"
-                    "Capital Expenses" "Interest Expenses" "Depreciation Expenses"
-                    "Cost of Goods Sold" "Non-operating Expenses" "Miscellaneous Expenses"])
-
-(def payment-methods ["Credit card" "Debit card" "Online payment"
-                      "Bank transfer" "BNPL" "Cash" "Check"
-                      "Crypto" "Mobile payment" "Other"])
-
-
-(defn parse-and-format-date [datetime]
-  (if (instance? Timestamp datetime)
-    (let [output-formatter (.withLocale (DateTimeFormatter/ofPattern "d MMMM yyyy - HH:mm:ss") Locale/ENGLISH)
-          local-datetime (.toLocalDateTime datetime)]
-      (.format local-datetime output-formatter))
-    (throw (IllegalArgumentException. "Expected a java.sql.Timestamp object"))))
+   [finadmin.views.helpers :refer [approval-status currencies expense-types
+                                   parse-and-format-date
+                                   parse-and-format-date-input payment-methods
+                                   payment-status]]
+   [hiccup2.core :as h]))
 
 (defn transactions-list
   [transactions {:keys [modal]}]
   (h/html
-   [:table {:class "w-full border-collapse"}
-    [:thead {:class "border-b-2 sticky top-0 z-10"}
+   [:table {:class "w-full border-collapse" :id "transaction-table"}
+    [:thead {:class "border-b-2 sticky top-0 z-2"}
      [:tr
-      [:th {:class "p-3 text-sm font-semibold tracking-wide text-left"} "Date"]
-      [:th {:class "p-3 text-sm font-semibold tracking-wide text-left"} "Amount"]
-      [:th {:class "p-3 text-sm font-semibold tracking-wide text-left"} "Currency"]
-      [:th {:class "p-3 text-sm font-semibold tracking-wide text-left"} "Type"]
-      [:th {:class "p-3 text-sm font-semibold tracking-wide text-left"} "Description"]
-      [:th {:class "p-3 text-sm font-semibold tracking-wide text-left"} "Payment method"]]]
+      [:th {:class "p-3 text-sm font-semibold tracking-wide text-left" :onclick "sortTable(0)"} "Date"]
+      [:th {:class "p-3 text-sm font-semibold tracking-wide text-left" :onclick "sortTable(1)"} "Amount"]
+      [:th {:class "p-3 text-sm font-semibold tracking-wide text-left" :onclick "sortTable(2)"} "Currency"]
+      [:th {:class "p-3 text-sm font-semibold tracking-wide text-left" :onclick "sortTable(3)"} "Type"]
+      [:th {:class "p-3 text-sm font-semibold tracking-wide text-left" :onclick "sortTable(4)"} "Description"]
+      [:th {:class "p-3 text-sm font-semibold tracking-wide text-left" :onclick "sortTable(5)"} "Payment method"]]]
 
     (if (empty? transactions)
       [:tbody
@@ -70,22 +46,103 @@
 (defn expense-details 
   [transaction]
   (h/html
-   [:tr [:td "Expense Type"] [:td (:expenses/expense_type transaction)]]
-   [:tr [:td "Reimbursement Status"] [:td (:expenses/reimbursement_status transaction)]]
-   [:tr [:td "Business Purpose"] [:td (:expenses/business_purpose transaction)]]
-   [:tr [:td "Approval Status"] [:td (:expenses/approval_status transaction)]]
-   [:tr [:td "Expense Date"] [:td (:expenses/expense_date transaction)]]))
+   [:tr
+    [:td "Expense Type"]
+    [:td [:div.custom-select
+          [:select {:name "expense_type"
+                    :required true
+                    :disabled true}
+           (for [expense-type expense-types]
+             [:option {:value expense-type 
+                       :selected (if (= expense-type (:expenses/expense_type transaction)) "selected" nil)} expense-type])]
+          [:span.custom-select-arrow]]]]
+   [:tr
+    [:td "Reimbursement Status"]
+    [:td [:div.custom-select
+          [:select {:name "reimbursement_status"
+                    :required true :disabled true}
+           (for [status ["Pending" "Approved" "Rejected" "Paid" "Under Review"]]
+             [:option {:value status 
+                       :selected (if (= status (:expenses/reimbursement_status transaction)) "selected" nil)} status])]
+          [:span.custom-select-arrow]]]]
+   [:tr
+    [:td "Business Purpose"]
+    [:td [:textarea {:name "business_purpose"
+                     :class "w-full h-48 resize-none"
+                     :disabled true}
+          (:expenses/business_purpose transaction)]]]
+   [:tr
+    [:td "Approval Status"]
+    [:td [:div.custom-select
+          [:select {:name "approval_status"
+                    :required true
+                    :disabled true}
+           (for [status approval-status]
+             [:option {:value status 
+                       :selected (if (= status (:expenses/approval_status transaction)) "selected" nil)} status])]
+          [:span.custom-select-arrow]]]]
+   [:tr
+    [:td "Expense Date"]
+    [:td [:input.w-full {:type "date"
+                         :name "expense_date"
+                         :required true
+                         :value (parse-and-format-date-input (:expenses/expense_date transaction))
+                         :disabled true}]]]))
 
-(defn invoice-details 
+(defn invoice-details
   [transaction]
   (h/html
-   [:tr [:td "Invoice Number"] [:td (:invoices/invoice_number transaction)]]
-   [:tr [:td "Vendor Name"] [:td (:invoices/vendor_name transaction)]]
-   [:tr [:td "PO Number"] [:td (:invoices/po_number transaction)]]
-   [:tr [:td "VAT Code"] [:td (:invoices/vat_code transaction)]]
-   [:tr [:td "Payment Terms"] [:td (:invoices/payment_terms transaction)]]
-   [:tr [:td "Due Date"] [:td (:invoices/due_date transaction)]]
-   [:tr [:td "Payment Status"] [:td (:invoices/payment_status transaction)]]))
+   [:tr
+    [:td "Invoice Number"]
+    [:td [:input.w-full {:type "text"
+                         :name "invoice_number"
+                         :required true
+                         :value (:invoices/invoice_number transaction) :disabled true}]]]
+   [:tr
+    [:td "Vendor Name"]
+    [:td [:input.w-full {:type "text"
+                         :name "vendor_name"
+                         :required true
+                         :value (:invoices/vendor_name transaction) :disabled true}]]]
+   [:tr
+    [:td "PO Number"]
+    [:td [:input.w-full {:type "text"
+                         :name "po_number"
+                         :required true
+                         :value (:invoices/po_number transaction)
+                         :disabled true}]]]
+   [:tr
+    [:td "VAT Code"]
+    [:td [:input.w-full {:type "text"
+                         :name "vat_code"
+                         :required true
+                         :value (:invoices/vat_code transaction)
+                         :disabled true}]]]
+   [:tr
+    [:td "Payment Terms"]
+    [:td [:input.w-full {:type "text"
+                         :name "payment_terms"
+                         :required true
+                         :value (:invoices/payment_terms transaction)
+                         :disabled true}]]]
+   [:tr
+    [:td "Due Date"]
+    [:td [:input.w-full {:type "date" 
+                         :name "due_date" 
+                         :required true 
+                         :value (parse-and-format-date-input (:invoices/due_date transaction) )
+                         :disabled true}]]]
+   [:tr
+    [:td "Payment Status"]
+    [:td [:div.custom-select
+          [:select {:name "payment_status" 
+                    :required true 
+                    :disabled true}
+           (for [status payment-status]
+             [:option {:value status 
+                       :selected (if (= status (:invoices/payment_status transaction)) "selected" nil)} status])]
+          [:span.custom-select-arrow]]]]))
+
 
 (defn transaction-details
   [transaction]
@@ -93,24 +150,73 @@
     (h/html
      [:div
       [:h2 "Transaction Details"]
-      [:table
-       [:tr [:th "Field"] [:th "Value"]]
-       [:tr [:td "Date"] [:td (:transactions/transaction_date transaction)]]
-       [:tr [:td "Amount"] [:td (:transactions/amount transaction)]]
-       [:tr [:td "Currency"] [:td (:transactions/currency transaction)]]
-       [:tr [:td "Type"] [:td (:transactions/transaction_type transaction)]]
-       [:tr [:td "Description"] [:td (:transactions/description transaction)]]
-       [:tr [:td "Payment Method"] [:td (:transactions/payment_method transaction)]]
-       (condp = (keyword transaction-type)
-         :expense (expense-details transaction)
-         :invoice (invoice-details transaction)
-         (throw (IllegalArgumentException. (str "Invalid transaction type: " transaction-type))))]
+      [:form
+       [:table#transaction-details
+        [:thead {:class "border-b-2 sticky top-0 z-2"}
+         [:tr 
+          [:th {:class "p-3 text-sm font-semibold tracking-wide text-left"} "Field"]
+          [:th {:class "p-3 text-sm font-semibold tracking-wide text-left"} "Value"]]]
+        [:tbody
+         [:tr
+          [:td "Transaction Date"]
+          [:td (parse-and-format-date (:transactions/transaction_date transaction))]]
+         [:tr
+          [:td "Amount"]
+          [:td [:input.w-full {:type "number"
+                               :name "amount"
+                               :step "0.1"
+                               :min "0"
+                               :required true
+                               :value (:transactions/amount transaction)
+                               :disabled true}]]]
+         [:tr
+          [:td "Currency"]
+          [:td [:div.custom-select
+                [:select {:name "currency" 
+                          :required true 
+                          :disabled true}
+                 (for [currency currencies]
+                   [:option {:value currency 
+                             :selected (if (= currency (:transactions/currency transaction)) "selected" nil)} currency])]
+                [:span.custom-select-arrow]]]]
+         [:tr
+          [:td "Transaction Type"]
+          [:td (:transactions/transaction_type transaction)]]
+         [:tr
+          [:td "Description"]
+          [:td [:textarea {:name "description"
+                           :class "w-full h-48 resize-none" 
+                           :disabled true} (:transactions/description transaction)]]]
+         [:tr
+          [:td "Payment Method"]
+          [:td  [:div.custom-select
+                 [:select {:name "payment_method" 
+                           :required true 
+                           :disabled true}
+                  (for [method payment-methods]
+                    [:option {:value method 
+                              :selected (if (= method (:transactions/payment_method transaction)) "selected" nil)} method])]
+                 [:span.custom-select-arrow]]]]
 
-      [:div
+         (condp = (keyword transaction-type)
+           :expense (expense-details transaction)
+           :invoice (invoice-details transaction)
+           (throw (IllegalArgumentException. (str "Invalid transaction type: " transaction-type))))]]]
+
+      [:div {:class "flex justify-between"}
        [:button {:type "button"
                  :hx-get (str "/delete-transaction/" (:transactions/transaction_id transaction) "/type/" transaction-type)
                  :hx-target "#transactions-container"
-                 :hx-trigger "click"} (str "Delete " transaction-type) " transaction"]]])))
+                 :hx-trigger "click"} (str "Delete " transaction-type) " transaction"]
+       [:button {:type "button"
+                 :id "modify-transaction-btn"
+                 :hx-get (str "/modify-transaction/" (:transactions/transaction_id transaction) "/type/" transaction-type)
+                 :hx-target "#transactions-container"
+                 :hx-trigger "click"
+                 :disabled true} (str "Update " transaction-type) " transaction"]
+       [:div {:class "checkbox"}
+        [:input {:type "checkbox" :onclick "toggleEditFields(this)"}]
+        [:i  "Enable Editing"]]]])))
 
 (defn transactions-component
   [transactions key_map]
@@ -129,7 +235,7 @@
        [:option {:value "all"} "All"]
        [:option {:value "invoice"} "Invoices"]
        [:option {:value "expense"} "Expenses"]]
-      [:span {:class "custom-select-arrow"}]]]
+      [:span.custom-select-arrow]]]
 
     [:div {:class "flex-1 overflow-auto mt-8" :id "transaction-list"}
      (transactions-list transactions key_map)]]))
@@ -162,7 +268,7 @@
          [:select {:name "currency" :required true}
           (for [currency currencies]
             [:option {:value currency :selected (if (= currency "EUR") "selected" nil)} currency])]
-         [:span {:class "custom-select-arrow"}]]]
+         [:span.custom-select-arrow]]]
        [:div {:class "input-group"}
         [:label "Expense Date:"]
         [:input {:type "date" :name "expense_date" :required true}]]
@@ -180,14 +286,14 @@
          [:select {:name "expense_type" :required true}
           (for [expense-type expense-types]
             [:option {:value expense-type :selected (if (= expense-type "Operating Expenses") "selected" nil)} expense-type])]
-         [:span {:class "custom-select-arrow"}]]]
+         [:span.custom-select-arrow]]]
        [:div {:class "input-group"}
         [:label "Payment Method:"]
         [:div.custom-select
          [:select {:name "payment_method" :required true}
           (for [method payment-methods]
             [:option {:value method :selected (if (= method "Bank transfer") "selected" nil)} method])]
-         [:span {:class "custom-select-arrow"}]]]]]
+         [:span.custom-select-arrow]]]]]
 
      ;; Expense Classification
      [:fieldset {:class "col-span-3 border p-4 rounded"}
@@ -199,14 +305,14 @@
          [:select {:name "reimbursement_status" :required true}
           (for [status ["Pending" "Approved" "Rejected" "Paid" "Under Review"]]
             [:option {:value status :selected (if (= status "Pending") "selected" nil)} status])]
-         [:span {:class "custom-select-arrow"}]]]
+         [:span.custom-select-arrow]]]
        [:div {:class "input-group"}
         [:label "Approval Status:"]
         [:div.custom-select
          [:select {:name "approval_status" :required true}
           (for [status ["Pending" "Approved" "Rejected" "In Progress" "On Hold" "Completed" "Needs Revision" "Escalated"]]
             [:option {:value status :selected (if (= status "Pending") "selected" nil)} status])]
-         [:span {:class "custom-select-arrow"}]]]
+         [:span.custom-select-arrow]]]
        [:div {:class "input-group col-span-2"}
         [:label "Business Purpose:"]
         [:textarea {:name "business_purpose" :class "w-full h-48 resize-none"}]]]]
@@ -244,7 +350,7 @@
          [:select {:name "currency" :required true}
           (for [currency currencies]
             [:option {:value currency :selected (if (= currency "EUR") "selected" nil)} currency])]
-         [:span {:class "custom-select-arrow"}]]]
+         [:span.custom-select-arrow]]]
        [:div {:class "input-group col-span-3"}
         [:label "Description:"]
         [:textarea {:name "description" :class "w-full h-48 resize-none"}]]]]
@@ -273,7 +379,7 @@
          [:select {:name "payment_method" :required true}
           (for [method payment-methods]
             [:option {:value method :selected (if (= method "Bank transfer") "selected" nil)} method])]
-         [:span {:class "custom-select-arrow"}]]]
+         [:span.custom-select-arrow]]]
        [:div {:class "input-group"}
         [:label "Payment Terms:"]
         [:input {:type "text" :name "payment_terms" :required true}]]
@@ -287,5 +393,5 @@
           (for [status ["Unpaid" "Paid" "Partial payment" "Overdue" "Pending"
                         "Failed" "Canceled" "Refunded"]]
             [:option {:value status :selected (if (= status "Unpaid") "selected" nil)} status])]
-         [:span {:class "custom-select-arrow"}]]]]]
+         [:span.custom-select-arrow]]]]]
      [:button {:type "submit"} "Submit"]]]))

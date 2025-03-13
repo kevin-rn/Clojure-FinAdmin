@@ -60,12 +60,73 @@ function togglePassword(button) {
 }
 
 function toggleAcknowledge(button) {
-  document.getElementById('delete-account-btn').disabled = !button.checked
+  document.getElementById('delete-account-btn').disabled = !button.checked;
 }
-
 
 function closeModal(button) {
   button.closest('dialog').close();
-  document.getElementById('popup').remove()
-  
+  document.getElementById('popup').remove();
+}
+
+function sortTable(n) {
+  // https://www.w3schools.com/howto/howto_js_sort_table.asp
+  var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+  table = document.getElementById("transaction-table");
+  switching = true;
+  dir = "asc";
+  while (switching) {
+    switching = false;
+    rows = table.rows;
+    for (i = 1; i < (rows.length - 1); i++) {
+      shouldSwitch = false;
+      x = rows[i].getElementsByTagName("TD")[n];
+      y = rows[i + 1].getElementsByTagName("TD")[n];
+      if (dir == "asc") {
+        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+          shouldSwitch = true;
+          break;
+        }
+      } else if (dir == "desc") {
+        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+          shouldSwitch = true;
+          break;
+        }
+      }
+    }
+    if (shouldSwitch) {
+      rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+      switching = true;
+      switchcount ++;
+    } else {
+      if (switchcount == 0 && dir == "asc") {
+        dir = "desc";
+        switching = true;
+      }
+    }
+  }
+}
+
+function toggleEditFields(button) {
+  var inputs = document.querySelectorAll('input');
+  var selects = document.querySelectorAll('select');
+  var textarea = document.querySelectorAll('textarea');
+  var modifyBtn = document.getElementById('modify-transaction-btn');
+
+  // Toggle all input fields
+  inputs.forEach(function(input) {
+    input.disabled = !input.disabled;
+  });
+  selects.forEach(function(select) {
+    select.disabled = !select.disabled;
+  });
+  textarea.forEach(function(textar) {
+    textar.disabled = !textar.disabled;
+  })
+
+  // Toggle Modify transaction button
+  modifyBtn.disabled = !modifyBtn.disabled;
+
+  // make sure the toggle button itself is not disabled 
+  // as it is also an input type
+  button.disabled = false; 
 }

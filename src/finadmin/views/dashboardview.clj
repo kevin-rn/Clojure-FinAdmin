@@ -1,6 +1,6 @@
 (ns finadmin.views.dashboardview
     (:require
-     [finadmin.views.transactionsview :refer [parse-and-format-date]]
+     [finadmin.views.helpers :refer [parse-and-format-date]]
      [hiccup.page :refer [include-css include-js]]
      [hiccup2.core :as h]))
 
@@ -137,7 +137,7 @@
           (include-js "https://code.jquery.com/jquery-3.6.0.min.js")
           [:script {:src "/js/app.js" :defer true}]
           [:link {:href "https://fonts.googleapis.com/css?family=Montserrat:400,900" :rel "stylesheet"}]
-          [:link {:rel "icon" :href "/logo/favicon.ico" :type "image/x-icon"}]]
+          [:link {:rel "shortcut icon" :href "/favicon.ico" :type "image/x-icon"}]]
          [:body
           [:header
            [:img {:src "/logo/logo.png" :alt "Logo" :class "logo"}]
