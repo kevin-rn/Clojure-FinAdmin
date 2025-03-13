@@ -12,7 +12,7 @@
     {:status 301
      :headers {"HX-Redirect" "/"}
      :session nil}
-    (let [{:keys [email]} (get-in request [:session])]
+    (let [{:keys [email]} (:session request)]
       (if (some? email)
         {:status 200
          :headers {"Content-Type" "text/html"}
@@ -35,7 +35,7 @@
 
 (defn transactions
   [request]
-  (let [{:keys [email]} (get-in request [:session])
+  (let [{:keys [email]} (:session request)
         transactions (get-transactions-by-email email "all")]
     {:status 200
      :headers {"Content-Type" "text/html"}
@@ -55,7 +55,7 @@
 
 (defn settings
   [request]
-  (let [{:keys [email password]} (get-in request [:session])
+  (let [{:keys [email password]} (:session request)
         account (get-account-info email password)]
     {:status 200
      :headers {"Content-Type" "text/html"}

@@ -1,4 +1,4 @@
-(ns finadmin.handlers.transactions 
+(ns finadmin.handlers.transactions
   (:require
    [finadmin.database.transactiondb :refer [add-expense-db add-invoice-db
                                             delete-transaction-db
@@ -10,8 +10,8 @@
 
 (defn filter-transactions
   [request]
-  (let [{:keys [transaction-type]} (get-in request [:params])
-        {:keys [email]} (get-in request [:session])
+  (let [{:keys [transaction-type]} (:params request)
+        {:keys [email]} (:session request)
         transactions (get-transactions-by-email email transaction-type)]
     {:status 200
      :headers {"Content-Type" "text/html"}
@@ -36,8 +36,8 @@
 
 (defn add-invoice
   [request]
-  (let [{:keys [email]} (get-in request [:session])
-        invoice-details (get-in request [:params])]
+  (let [{:keys [email]} (:session request)
+        invoice-details (:params request)]
     (add-invoice-db email invoice-details)
     {:status 200
      :headers {"Content-Type" "text/html"}
@@ -46,24 +46,23 @@
 (defn modify-transaction
   [request]
   (let [{:keys [transaction-id transaction-type]} (:path-params request)
-        {:keys [updates]} (:params request)]
+        updates (get-in request [:params])]
     (modify-transaction-db transaction-id transaction-type updates)
-    {:status 301
-     :headers {"HX-redirect" "/transactions"}}))
+    (let [transaction (get-transaction-by-id transaction-id transaction-type)]
+      {:status 200
+       :headers {"Content-Type" "text/html"}
+       :body (str (views/transaction-details transaction))})))
 
 (defn delete-transaction
   [request]
   (let [{:keys [transaction-id transaction-type]} (:path-params request)
-        {:keys [email]} (get-in request [:session])
+        {:keys [email]} (:session request)
         response (delete-transaction-db transaction-id transaction-type)
         transactions (get-transactions-by-email email "all")]
     (if (:success response)
       {:status 200
        :headers {"Content-Type" "text/html"}
-       :body (str (views/transactions-component transactions {:modal true}))} 
+       :body (str (views/transactions-component transactions {:modal true}))}
       {:status 200
        :headers {"Content-Type" "text/html"}
        :body (str (views/transactions-component transactions {}))})))
-
-
-

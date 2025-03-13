@@ -33,9 +33,11 @@
       (.format local-datetime output-formatter))
     (throw (IllegalArgumentException. "Expected a java.sql.Timestamp object"))))
 
-(defn parse-and-format-date-input [datetime]
+(defn parse-and-format-date-input 
+  " ISO 8601 format (yyyy-MM-dd), "
+  [datetime]
   (if (instance? Timestamp datetime)
-    (let [output-formatter (.withLocale (DateTimeFormatter/ofPattern "YYYY-MM-DD") Locale/ENGLISH)
-          local-datetime (.toLocalDateTime datetime)]
+    (let [output-formatter (.withLocale (DateTimeFormatter/ofPattern "yyyy-MM-dd") Locale/ENGLISH)
+          local-datetime (.toLocalDateTime datetime)] 
       (.format local-datetime output-formatter))
     (throw (IllegalArgumentException. "Expected a java.sql.Timestamp object"))))
