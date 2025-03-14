@@ -28,7 +28,7 @@ main {
     margin-bottom: 10px;
 }
 
-#dashboard-content button {
+#dashboard-content button:not(.remove-file) {
     background-color: var(--base-clr);
     border: solid var(--base-clr);
     color: var(--primary-txt-clr);
@@ -43,12 +43,12 @@ main {
     transition-duration: 0.4s;
 }
 
-#dashboard-content button:hover {
+#dashboard-content button:hover:not(.remove-file) {
     background-color: var(--primary-txt-clr);
     color: var(--base-clr);
 }
 
-#dashboard-content button:active, #dashboard-content button:focus {
+#dashboard-content button:active:not(.remove-file), #dashboard-content button:focus:not(.remove-file) {
     background-color: var(--accent-clr);
     color: var(--primary-txt-clr);
 }

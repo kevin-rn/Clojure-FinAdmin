@@ -1,5 +1,7 @@
 @import url("global.css");
 
+
+/* Document form upload styling */
 #forms-component > form > fieldset {
     margin-top: 10px;
 }
@@ -41,6 +43,55 @@
     border-color: var(--txt-shadow-clr);
 }
 
+.drag-over {
+    border: 2px dashed #0077cc;
+    background-color: rgba(0, 119, 204, 0.1);
+  }
+
+#document-files {
+    width: 50%;
+}
+
+#document-files li {
+    padding: 5px 5px 5px 40px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    list-style: none;
+    background-color: var(--box-clr);
+    border-radius: 5px;
+    overflow: hidden;
+    position: relative;
+}
+
+#document-files li p {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: calc(100% - 40px);
+}
+
+#document-files li::before {
+    content: '';
+
+    position: absolute;
+    left: 0;
+    transform: translate(50%, 0);
+    width: 20px;
+    height: 20px;
+    background-image: url("/icons/file.svg");
+    background-size: contain;
+    background-repeat: no-repeat;
+    filter: var(--base-filter-clr);
+}
+
+.remove-file {
+    position: absolute;
+    right: 5px;
+    top: 0;
+    padding: 5px;
+    border-style: none;
+    background-color: transparent;
+}
 
 /* Popup dialog modal styling */
 dialog.popup {

@@ -1,5 +1,6 @@
 const toggleButton = document.getElementById('toggle-btn');
 const sidebar = document.getElementById('sidebar');
+// const dropzone = document.getElementById("dropzone-file").parentElement;
 
 $(document).ready(function () {
   // Highlight selected menu item when clicked.
@@ -148,3 +149,51 @@ function toggleEditFields(button) {
   // as it is also an input type
   button.disabled = false; 
 }
+
+
+function getFileData(event) {
+  const files = event.target.files;
+  const list = document.getElementById("document-files");
+
+  if (files.length > 0) {
+    list.innerHTML = "";
+
+    for (let i = 0; i < files.length; i++) {
+      const listItem = document.createElement("li");
+
+      // Create the <p> element to hold the file name
+      const textElement = document.createElement("p");
+      textElement.textContent = files[i].name;
+
+      // Create remove button
+      const removeButton = document.createElement("button");
+      removeButton.classList.add("remove-file");
+      removeButton.textContent = "✖";
+      removeButton.onclick = function () {
+        listItem.remove();
+      };
+      
+      // Append the <p> and button to the list item
+      listItem.appendChild(textElement);
+      listItem.appendChild(removeButton);
+      
+      // Append the list item to the list
+      list.appendChild(listItem);
+    }
+  }
+}
+
+// Drag and drop functionality
+// dropzone.addEventListener("dragover", function (event) {
+//   event.preventDefault();
+//   dropzone.classList.add("drag-over");
+// });
+
+// dropzone.addEventListener("dragleave", function () {
+//   dropzone.classList.remove("drag-over");
+// });
+
+// dropzone.addEventListener("drop", function (event) {
+//   event.preventDefault();
+//   dropzone.classList.remove("drag-over");
+// });

@@ -33,7 +33,13 @@
         [:input {:id "dropzone-file"
                  :type "file"
                  :accept ".pdf,.xls,.xlsx,.csv,.docx,.jpg,.png,.gif,.svg"
-                 :class "hidden"}]]]
+                 :class "hidden"
+                 :onchange "getFileData(event)"
+                 :multiple true}]]] 
+      [:div {:class "flex flex-col items-center justify-center w-full"} 
+       [:ul#document-files
+        [:li [:p "This is an example document - upload file(s) above to see other filenames.pdf"]
+         [:button {:class "remove-file" :onclick "this.parentElement.remove();"} "✖" ]]]]
       [:div {:class "grid grid-cols-3"}
        [:div.input-group
         [:label "Transaction Date:"]
