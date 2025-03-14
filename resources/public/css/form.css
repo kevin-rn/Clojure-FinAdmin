@@ -1,5 +1,47 @@
 @import url("global.css");
 
+#forms-component > form > fieldset {
+    margin-top: 10px;
+}
+
+.dropzone {
+    border-style: dashed;
+    border-width: 2px;
+    border-color: var(--border-clr);
+    border-radius: 10px;
+    height: 10em;
+    margin: 10px 0 10px 0;
+
+    p {
+        margin-top: 10px;
+    }
+
+    p:last-child {
+        font-size: 14px;
+    }
+
+    img {
+        height: 30px;
+        width: auto;
+        filter: var(--grey-filter-clr);
+    }
+
+    p span {
+        font-weight: 510;
+    }
+}
+
+.dropzone:hover {
+    background-color: color-mix(in srgb, var(--accent-clr), transparent 75%);
+    border-color: var(--txt-shadow-clr);
+}
+
+.dropzone:active {
+    background-color: color-mix(in srgb, var(--secondary-txt-clr), transparent 75%);
+    border-color: var(--txt-shadow-clr);
+}
+
+
 /* Popup dialog modal styling */
 dialog.popup {
     position: fixed;
@@ -91,6 +133,11 @@ select {
     > label {
         margin-right: 5px;
     }
+}
+
+fieldset > legend {
+    font-style:oblique;
+    font-size: 14px
 }
 
 /* Checkbox styling */
@@ -229,7 +276,7 @@ table tr:nth-child(even) td {
     background-color: var(--box-clr);
 }
 
-#transaction-table tr:hover {
+#transaction-table tr:hover:not(.non-items) {
     background-color: var(--accent-clr);
     cursor: pointer;
     td {
@@ -237,7 +284,7 @@ table tr:nth-child(even) td {
     }
 }
 
-#transaction-table tr:focus, #transaction-table tr:active {
+#transaction-table tr:focus:not(.non-items), #transaction-table tr:active:not(.non-items) {
     background-color: var(--secondary-txt-clr);
     cursor: pointer;
 }

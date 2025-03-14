@@ -72,6 +72,12 @@ function sortTable(n, th) {
   // https://www.w3schools.com/howto/howto_js_sort_table.asp
   var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
   table = document.getElementById("transaction-table");
+
+  // If there is only one row, do nothing
+  if (table.rows.length <= 2) {
+    return; 
+  }
+
   switching = true;
   dir = th.getAttribute("data-sort") === "asc" ? "desc" : "asc";
   

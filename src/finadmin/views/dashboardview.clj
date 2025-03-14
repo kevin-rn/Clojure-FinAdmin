@@ -1,6 +1,6 @@
 (ns finadmin.views.dashboardview
     (:require
-     [finadmin.views.helpers :refer [parse-and-format-date]]
+     [finadmin.views.helpers :refer [document-types parse-and-format-date]]
      [hiccup.page :refer [include-css include-js]]
      [hiccup2.core :as h]))
 
@@ -14,14 +14,72 @@
 (defn forms-component
   []
   (h/html
-   [:div
+   [:div#forms-component
     [:h2 "Upload Forms or Documents"]
-    [:button "Upload"]]
+    [:form {:class "grid grid-cols-3"
+            :hx-post "/add-document"
+            :hx-target "#forms-component"} 
+     [:fieldset {:class "col-span-3 border p-4 rounded"}
+      [:legend "Document Details"]
+      [:div {:class "flex items-center justify-center w-full"}
+       [:label
+        {:for "dropzone-file",
+         :class "flex flex-col items-center justify-center w-3/4 dropzone"}
+        [:div
+         {:class "flex flex-col items-center justify-center"}
+         [:img {:src "/icons/upload.svg"}]
+         [:p [:span "Click to upload"] " or drag and drop"]
+         [:p "Allowed formats: " [:i "PDF, Excel (XLSX, CSV), DOCX, Images"]]]
+        [:input {:id "dropzone-file"
+                 :type "file"
+                 :accept ".pdf,.xls,.xlsx,.csv,.docx,.jpg,.png,.gif,.svg"
+                 :class "hidden"}]]]
+      [:div {:class "grid grid-cols-3"}
+       [:div.input-group
+        [:label "Transaction Date:"]
+        [:input {:type "date"
+                 :name "transaction_date"
+                 :required true}]]
+       [:div.input-group
+        [:label "Associated Entities:"]
+        [:input {:type "text"
+                 :name "associated_entities"
+                 :placeholder "Contractor, Supplier, etc."
+                 :required true}]]
+       [:div.input-group
+        [:label "Document Type:"]
+        [:div.custom-select
+         [:select {:name "document_type"
+                   :required true}
+          (for [type document-types]
+            [:option {:value type
+                      :selected (if (= type "Invoice") "selected" nil)} type])]
+         [:span.custom-select-arrow]]]
+       [:div {:class "input-group col-span-3"}
+        [:label "Description:"]
+        [:textarea {:name "description"
+                    :class "w-full h-48 resize-none"}]]]]
+
+     [:button {:type "submit" :disabled true} "Upload document"]
+     [:div {:id "warning-sign" :class "flex justify-end"} [:p  "*This feature has not been implemented."]]]]
 
    [:div
     [:h2 "Documents:"]
-    [:ul
-     [:li "Some documents"]]]))
+    [:table {:class "w-full" :id "transaction-table"}
+     [:thead
+      [:tr
+       [:th {:class "font-semibold text-left" :onclick "sortTable(0, this)"} "Date"
+        [:span.sort-icon
+         [:img {:src "/icons/dropdown.svg" :id "sort-btn-initial" :alt "Sort asc"}]]]
+       [:th {:class "font-semibold text-left" :onclick "sortTable(1, this)"} "Document Name" [:span.sort-icon]]
+       [:th {:class "font-semibold text-left" :onclick "sortTable(2, this)"} "Transaction Date" [:span.sort-icon]]
+       [:th {:class "font-semibold text-left" :onclick "sortTable(3, this)"} "Associated Entities" [:span.sort-icon ""]]
+       [:th {:class "font-semibold text-left" :onclick "sortTable(4, this)"} "Document Type" [:span.sort-icon]]
+       [:th {:class "font-semibold text-left" :onclick "sortTable(5, this)"} "Description" [:span.sort-icon]]]]
+     [:tbody
+      [:tr {:class "text-center non-items"}
+       [:td {:colspan "6"} [:i.select-none "No Documents stored"]]]]
+     ]]))
 
 
 (defn settings-component

@@ -23,7 +23,7 @@
 
     (if (empty? transactions)
       [:tbody
-       [:tr {:class "text-center"}
+       [:tr {:class "text-center non-items"}
         [:td {:colspan "6"} [:i.select-none "No Transactions stored"]]]]
       [:tbody
        (for [{:transactions/keys [transaction_id transaction_date amount currency transaction_type description payment_method]} transactions]

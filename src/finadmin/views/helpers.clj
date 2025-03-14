@@ -25,6 +25,11 @@
 (def payment-status ["Unpaid" "Paid" "Partial payment" "Overdue" "Pending"
                      "Failed" "Canceled" "Refunded"])
 
+(def document-types ["Invoice", "Payment Receipt", "Bank Statement",
+                     "Payroll Report", "Tax Invoice", "Tax Return",
+                     "Balance Sheet", "Profit & Loss Statement",
+                     "General Ledger Report", "Purchase Order"])
+
 
 (defn parse-and-format-date [datetime]
   (if (instance? Timestamp datetime)

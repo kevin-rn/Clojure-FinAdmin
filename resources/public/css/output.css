@@ -32,6 +32,9 @@
 .col-span-3 {
   grid-column: span 3 / span 3;
 }
+.col-span-4 {
+  grid-column: span 4 / span 4;
+}
 .block {
   display: block;
 }
@@ -62,6 +65,9 @@
 .w-2\/3 {
   width: calc(2/3 * 100%);
 }
+.w-3\/4 {
+  width: calc(3/4 * 100%);
+}
 .w-auto {
   width: auto;
 }
@@ -80,14 +86,14 @@
 .flex-shrink {
   flex-shrink: 1;
 }
-.flex-grow {
-  flex-grow: 1;
-}
 .border-collapse {
   border-collapse: collapse;
 }
 .transform {
   transform: var(--tw-rotate-x) var(--tw-rotate-y) var(--tw-rotate-z) var(--tw-skew-x) var(--tw-skew-y);
+}
+.cursor-pointer {
+  cursor: pointer;
 }
 .resize {
   resize: both;
@@ -100,6 +106,9 @@
 }
 .grid-cols-3 {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.grid-cols-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 .grid-cols-6 {
   grid-template-columns: repeat(6, minmax(0, 1fr));
@@ -119,12 +128,19 @@
 .justify-center {
   justify-content: center;
 }
+.justify-end {
+  justify-content: flex-end;
+}
 .overflow-auto {
   overflow: auto;
 }
 .border {
   border-style: var(--tw-border-style);
   border-width: 1px;
+}
+.border-2 {
+  border-style: var(--tw-border-style);
+  border-width: 2px;
 }
 .border-b {
   border-bottom-style: var(--tw-border-style);
@@ -133,6 +149,10 @@
 .border-b-2 {
   border-bottom-style: var(--tw-border-style);
   border-bottom-width: 2px;
+}
+.border-dashed {
+  --tw-border-style: dashed;
+  border-style: dashed;
 }
 .border-solid {
   --tw-border-style: solid;
@@ -147,9 +167,6 @@
 .text-left {
   text-align: left;
 }
-.text-wrap {
-  text-wrap: wrap;
-}
 .italic {
   font-style: italic;
 }
@@ -160,14 +177,6 @@
 .outline {
   outline-style: var(--tw-outline-style);
   outline-width: 1px;
-}
-.invert {
-  --tw-invert: invert(100%);
-  filter: var(--tw-blur,) var(--tw-brightness,) var(--tw-contrast,) var(--tw-grayscale,) var(--tw-hue-rotate,) var(--tw-invert,) var(--tw-saturate,) var(--tw-sepia,) var(--tw-drop-shadow,);
-}
-.sepia {
-  --tw-sepia: sepia(100%);
-  filter: var(--tw-blur,) var(--tw-brightness,) var(--tw-contrast,) var(--tw-grayscale,) var(--tw-hue-rotate,) var(--tw-invert,) var(--tw-saturate,) var(--tw-sepia,) var(--tw-drop-shadow,);
 }
 .filter {
   filter: var(--tw-blur,) var(--tw-brightness,) var(--tw-contrast,) var(--tw-grayscale,) var(--tw-hue-rotate,) var(--tw-invert,) var(--tw-saturate,) var(--tw-sepia,) var(--tw-drop-shadow,);
