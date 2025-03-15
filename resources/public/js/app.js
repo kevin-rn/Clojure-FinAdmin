@@ -183,17 +183,29 @@ function getFileData(event) {
   }
 }
 
-// Drag and drop functionality
-// dropzone.addEventListener("dragover", function (event) {
-//   event.preventDefault();
-//   dropzone.classList.add("drag-over");
-// });
+function dragAndDrop() {
+  const dropzone = document.querySelector(".dropzone");
+  const fileInput = document.getElementById("dropzone-file");
 
-// dropzone.addEventListener("dragleave", function () {
-//   dropzone.classList.remove("drag-over");
-// });
+  dropzone.addEventListener("dragover", function (event) {
+      event.preventDefault();
+      dropzone.classList.add("drag-over");
+  });
 
-// dropzone.addEventListener("drop", function (event) {
-//   event.preventDefault();
-//   dropzone.classList.remove("drag-over");
-// });
+  dropzone.addEventListener("dragleave", function () {
+      dropzone.classList.remove("drag-over");
+  });
+
+  dropzone.addEventListener("drop", function (event) {
+      event.preventDefault();
+      dropzone.classList.remove("drag-over");
+      
+      const files = event.dataTransfer.files;
+      fileInput.files = files;
+      getFileData({ target: fileInput });
+  });
+
+  dropzone.addEventListener("click", function () {
+      fileInput.click();
+  });
+};

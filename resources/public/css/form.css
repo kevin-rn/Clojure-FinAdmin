@@ -44,8 +44,8 @@
 }
 
 .drag-over {
-    border: 2px dashed #0077cc;
-    background-color: rgba(0, 119, 204, 0.1);
+    border: 2px dashed var(--dragzone-clr);
+    background-color: color-mix(in srgb, var(--dragzone-clr), transparent 90%);
   }
 
 #document-files {

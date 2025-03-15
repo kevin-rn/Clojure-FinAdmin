@@ -2,9 +2,6 @@
 .collapse {
   visibility: collapse;
 }
-.invisible {
-  visibility: hidden;
-}
 .visible {
   visibility: visible;
 }
@@ -35,9 +32,6 @@
 .col-span-3 {
   grid-column: span 3 / span 3;
 }
-.container {
-  width: 100%;
-}
 .block {
   display: block;
 }
@@ -53,8 +47,8 @@
 .hidden {
   display: none;
 }
-.inline {
-  display: inline;
+.inline-block {
+  display: inline-block;
 }
 .table {
   display: table;
@@ -92,17 +86,8 @@
 .flex-shrink {
   flex-shrink: 1;
 }
-.shrink {
-  flex-shrink: 1;
-}
-.shrink-2 {
-  flex-shrink: 2;
-}
-.flex-grow {
-  flex-grow: 1;
-}
-.grow {
-  flex-grow: 1;
+.border-collapse {
+  border-collapse: collapse;
 }
 .transform {
   transform: var(--tw-rotate-x) var(--tw-rotate-y) var(--tw-rotate-z) var(--tw-skew-x) var(--tw-skew-y);
@@ -140,11 +125,6 @@
 .justify-end {
   justify-content: flex-end;
 }
-.truncate {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
 .overflow-auto {
   overflow: auto;
 }
@@ -173,21 +153,8 @@
 .text-left {
   text-align: left;
 }
-.capitalize {
-  text-transform: capitalize;
-}
-.lowercase {
-  text-transform: lowercase;
-}
 .italic {
   font-style: italic;
-}
-.ordinal {
-  --tw-ordinal: ordinal;
-  font-variant-numeric: var(--tw-ordinal,) var(--tw-slashed-zero,) var(--tw-numeric-figure,) var(--tw-numeric-spacing,) var(--tw-numeric-fraction,);
-}
-.underline {
-  text-decoration-line: underline;
 }
 .ring {
   --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentColor);
@@ -201,6 +168,10 @@
   --tw-invert: invert(100%);
   filter: var(--tw-blur,) var(--tw-brightness,) var(--tw-contrast,) var(--tw-grayscale,) var(--tw-hue-rotate,) var(--tw-invert,) var(--tw-saturate,) var(--tw-sepia,) var(--tw-drop-shadow,);
 }
+.sepia {
+  --tw-sepia: sepia(100%);
+  filter: var(--tw-blur,) var(--tw-brightness,) var(--tw-contrast,) var(--tw-grayscale,) var(--tw-hue-rotate,) var(--tw-invert,) var(--tw-saturate,) var(--tw-sepia,) var(--tw-drop-shadow,);
+}
 .filter {
   filter: var(--tw-blur,) var(--tw-brightness,) var(--tw-contrast,) var(--tw-grayscale,) var(--tw-hue-rotate,) var(--tw-invert,) var(--tw-saturate,) var(--tw-sepia,) var(--tw-drop-shadow,);
 }
@@ -212,10 +183,6 @@
   transition-property: color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tw-gradient-from, --tw-gradient-via, --tw-gradient-to, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter;
   transition-timing-function: var(--tw-ease, ease);
   transition-duration: var(--tw-duration, 0s);
-}
-.select-all {
-  -webkit-user-select: all;
-  user-select: all;
 }
 .select-none {
   -webkit-user-select: none;
@@ -250,26 +217,6 @@
   syntax: "*";
   inherits: false;
   initial-value: solid;
-}
-@property --tw-ordinal {
-  syntax: "*";
-  inherits: false;
-}
-@property --tw-slashed-zero {
-  syntax: "*";
-  inherits: false;
-}
-@property --tw-numeric-figure {
-  syntax: "*";
-  inherits: false;
-}
-@property --tw-numeric-spacing {
-  syntax: "*";
-  inherits: false;
-}
-@property --tw-numeric-fraction {
-  syntax: "*";
-  inherits: false;
 }
 @property --tw-shadow {
   syntax: "*";

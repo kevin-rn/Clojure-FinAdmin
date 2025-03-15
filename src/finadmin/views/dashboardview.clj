@@ -6,19 +6,17 @@
    [hiccup.page :refer [include-css include-js]]
    [hiccup2.core :as h]))
 
-
-
 (defn overview-component
   [data]
   (let [transaction-data (group-type-transactions data)
-        transActionDataStr (str "const transactionData = " (json/write-str transaction-data) "; ")
-        jscode (str transActionDataStr "window.onload = function() { createTransactionPlot(); }")]
+        transActionDataStr (str "var transactionData = " (json/write-str transaction-data) "; ")
+        jscode (str transActionDataStr "console.log('test'); createTransactionPlot();")]
     (h/html
-     [:div
-      [:p "Overview"]
+
+     [:div#overview-component
+      [:h2 "Overview"]
       [:div
-       [:canvas#transactionChart]]
-      [:script {:src "/js/plot.js" :defer true}]
+       [:canvas#transactionChart]] 
       [:script {:type "text/javascript" :defer true} (h/raw jscode)]])))
 
 (defn forms-component
@@ -45,7 +43,8 @@
                  :accept ".pdf,.xls,.xlsx,.csv,.docx,.jpg,.png,.gif,.svg"
                  :class "hidden"
                  :onchange "getFileData(event)"
-                 :multiple true}]]] 
+                 :multiple true}]]]
+      [:script (h/raw "window.onload = dragAndDrop();")]
       [:div {:class "flex flex-col items-center justify-center w-full"} 
        [:ul#document-files
         [:li [:p "This is an example document - upload file(s) above to see other filenames.pdf"]
@@ -96,7 +95,6 @@
       [:tr {:class "text-center non-items"}
        [:td {:colspan "6"} [:i.select-none "No Documents stored"]]]]
      ]]))
-
 
 (defn settings-component
   [account {:keys [error modal]}]
@@ -207,10 +205,11 @@
           [:title "Clojure FinAdmin"]
           (include-css "/css/output.css")
           (include-css "/css/dashboard.css")
+          (include-js  "/js/plot.js")
+          [:script {:src "/js/app.js" :defer true}]
           (include-js "https://unpkg.com/htmx.org@2.0.4")
           (include-js "https://code.jquery.com/jquery-3.6.0.min.js")
           (include-js "https://cdn.jsdelivr.net/npm/chart.js")
-          [:script {:src "/js/app.js" :defer true}]
           [:link {:href "https://fonts.googleapis.com/css?family=Montserrat:400,900" :rel "stylesheet"}]
           [:link {:rel "shortcut icon" :href "/favicon.ico" :type "image/x-icon"}]]
          [:body

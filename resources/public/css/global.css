@@ -11,6 +11,7 @@
     --select-clr: #4d5061;
     --error-clr: #fedce0;
     --error-border-clr: #f76e80;
+    --dragzone-clr: #0077cc;
     --base-filter-clr: invert(73%) sepia(90%) saturate(346%) hue-rotate(37deg) brightness(95%) contrast(88%);
     --accent-filter-clr: invert(59%) sepia(10%) saturate(7422%) hue-rotate(313deg) brightness(104%) contrast(94%);
     --grey-filter-clr: invert(100%) sepia(0%) saturate(6932%) hue-rotate(279deg) brightness(77%) contrast(121%);
