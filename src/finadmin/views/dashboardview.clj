@@ -1,22 +1,85 @@
 (ns finadmin.views.dashboardview
   (:require
    [clojure.data.json :as json]
-   [finadmin.views.helpers :refer [document-types group-type-transactions
-                                   parse-and-format-date]]
+   [finadmin.views.helpers :refer [aggregate-transactions count-by-key
+                                   document-types group-by-month-and-currency
+                                   parse-and-format-date
+                                   total-amount-per-currency]]
    [hiccup.page :refer [include-css include-js]]
    [hiccup2.core :as h]))
 
 (defn overview-component
-  [data]
-  (let [transaction-data (group-type-transactions data)
-        transActionDataStr (str "var transactionData = " (json/write-str transaction-data) "; ")
-        jscode (str transActionDataStr "console.log('test'); createTransactionPlot();")]
+  [{:keys [expdata invdata]}]
+  (let [totalExpense (total-amount-per-currency expdata)
+        totalInvoice (total-amount-per-currency invdata)
+        expenseType (count-by-key :expenses/expense_type expdata)
+        chartData   (json/write-str (aggregate-transactions (group-by-month-and-currency (concat expdata invdata))))
+        dataStr (str "var expenseTypeData = " expenseType "; "
+                     "var chartData = " chartData "; ")
+        jscode (str dataStr "createExpensePieChart(); createStackedBarChart(); ")]
     (h/html
+     [:div {:id "overview-component" :class "grid grid-cols-2 grid-rows-4"}
+      [:div {:class "chart-div col-span-1 row-span-1"}
+       [:h2 "Overview"]
+       [:div {:class "grid grid-cols-2"}
+        [:div
+         [:h5 "Invoices - Total Amount"]
+         (for [[currency amount] totalInvoice]
+           [:p (str (name currency) ": " amount)])]
+        [:div 
+         [:h5 "Expenses  - Total Amount"]
+         (for [[currency amount] totalExpense]
+           [:p (str (name currency) ": " amount)])]]]
+      [:div {:class "chart-div col-span-1 row-span-3"}
+       [:h3 "Expense Types"]
+       [:canvas#expensePieChart]]
+      [:div {:class "chart-div col-span-1 row-span-2"}
+       [:h3 "Currency distribution - Invoices & Expenses"]
+       [:canvas#stackedBarChart]]
+      [:div {:class "chart-div col-span-2 row-span-1"}
+       [:h3 "Recent Transactions"]
+       [:div {:class "grid grid-cols-2"}
+        [:h5 "Expenses"]
+        [:h5 "Invoices"]
+        [:table {:class "w-full"}
+         [:thead
+          [:tr
+           [:th {:class "font-semibold text-left"} "Date"]
+           [:th {:class "font-semibold text-left"} "Amount"]
+           [:th {:class "font-semibold text-left"} "Currency"]
+           [:th {:class "font-semibold text-left"} "Payment method"]]]
+         (if (empty? expdata)
+           [:tbody
+            [:tr {:class "text-center non-items"}
+             [:td {:colspan "6"} [:i.select-none "No Transactions stored"]]]]
+           [:tbody
+            (for [{:transactions/keys [transaction_date amount currency payment_method]} (take 3 expdata)]
+              [:tr {:class "border-b non-items"}
+               [:td (parse-and-format-date transaction_date)]
+               [:td amount]
+               [:td currency]
+               [:td payment_method]])])]
 
-     [:div#overview-component
-      [:h2 "Overview"]
-      [:div
-       [:canvas#transactionChart]] 
+        [:table {:class "w-full"}
+         [:thead
+          [:tr
+           [:th {:class "font-semibold text-left"} "Date"]
+           [:th {:class "font-semibold text-left"} "Amount"]
+           [:th {:class "font-semibold text-left"} "Currency"]
+           [:th {:class "font-semibold text-left"} "Payment method"]]]
+         (if (empty? invdata)
+           [:tbody
+            [:tr {:class "text-center non-items"}
+             [:td {:colspan "6"} [:i.select-none "No Transactions stored"]]]]
+           [:tbody
+            (for [{:transactions/keys [transaction_date amount currency payment_method]} (take 3 invdata)]
+              [:tr {:class "border-b non-items"}
+               [:td (parse-and-format-date transaction_date)]
+               [:td amount]
+               [:td currency]
+               [:td payment_method]])])]]] 
+      
+
       [:script {:type "text/javascript" :defer true} (h/raw jscode)]])))
 
 (defn forms-component
@@ -197,7 +260,7 @@
     [:div {:id "warning-sign"} [:p  "*This feature has not been implemented."]]]))
 
 (defn dashboard
-  [email transactions]
+  [email data]
   (str "<!DOCTYPE html>"
        (h/html
         [:html
@@ -205,11 +268,14 @@
           [:title "Clojure FinAdmin"]
           (include-css "/css/output.css")
           (include-css "/css/dashboard.css")
-          (include-js  "/js/plot.js")
-          [:script {:src "/js/app.js" :defer true}]
           (include-js "https://unpkg.com/htmx.org@2.0.4")
           (include-js "https://code.jquery.com/jquery-3.6.0.min.js")
           (include-js "https://cdn.jsdelivr.net/npm/chart.js")
+          (include-js "https://d3js.org/d3-color.v1.min.js")
+          (include-js "https://d3js.org/d3-interpolate.v1.min.js")
+          (include-js "https://d3js.org/d3-scale-chromatic.v3.min.js")
+          (include-js  "/js/plot.js")
+          [:script {:src "/js/app.js" :defer true}]
           [:link {:href "https://fonts.googleapis.com/css?family=Montserrat:400,900" :rel "stylesheet"}]
           [:link {:rel "shortcut icon" :href "/favicon.ico" :type "image/x-icon"}]]
          [:body
@@ -258,4 +324,4 @@
 
            [:main {:class "flex items-center justify-center"}
             [:div {:id "dashboard-content" :class "min-w-3/4"} 
-             (overview-component transactions)]]]]])))
+             (overview-component data)]]]]])))

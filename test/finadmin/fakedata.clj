@@ -11,11 +11,11 @@
   (rand-nth items))
 
 (defn random-amount []
-  (* (rand) 10000))
+  (* (rand) 100))
 
 (defn random-date []
   (let [random (Random.)
-        year (+ 1950 (.nextInt random 100))
+        year 2025
         month (+ 1 (.nextInt random 12))
         day (+ 1 (.nextInt random 28))
         random-date (LocalDate/of year month day)]
@@ -25,7 +25,7 @@
 ;; Generate fake expense data
 (defn generate-fake-expense []
   {:amount (random-amount)
-   :currency (rand-item helpers/currencies)
+   :currency (rand-item ["EUR", "USD", "CHF", "AUD"])
    :description (str "Fake description for expense #" (rand-int 1000))
    :expense_date (random-date)
    :expense_type (rand-item helpers/expense-types)
@@ -37,7 +37,7 @@
 ;; Generate fake invoice data
 (defn generate-fake-invoice []
   {:amount (random-amount)
-   :currency (rand-item helpers/currencies)
+   :currency (rand-item ["EUR", "USD", "CHF", "AUD"])
    :description (str "Fake description for invoice #" (rand-int 1000))
    :invoice_number (str "INV-" (rand-int 10000))
    :vendor_name (str "Fake Vendor #" (rand-int 100))

@@ -1,10 +1,18 @@
 (ns finadmin.handlers.dashboard 
   (:require
    [finadmin.database.accountdb :refer [get-account-info]]
-   [finadmin.database.transactiondb :refer [get-transactions-by-email]]
+   [finadmin.database.transactiondb :refer [get-expense-transactions-by-email
+                                            get-invoice-transactions-by-email
+                                            get-transactions-by-email]]
    [finadmin.views.dashboardview :as dashviews]
    [finadmin.views.transactionsview :as transviews]))
 
+
+(defn get-all-data
+  [email]
+  (let [expenses (get-expense-transactions-by-email email)
+        invoices (get-invoice-transactions-by-email email)]
+  {:expdata expenses :invdata invoices}))
 
 (defn dashboard-page
   [request]
@@ -16,7 +24,7 @@
       (if (some? email)
         {:status 200
          :headers {"Content-Type" "text/html"}
-         :body (dashviews/dashboard email (get-transactions-by-email email "all"))}
+         :body (dashviews/dashboard email (get-all-data email))}
         {:status 302
          :headers {"Location" "/"}
          :session nil}))))
@@ -24,10 +32,10 @@
 (defn overview
   [request]
   (let [{:keys [email]} (:session request)
-        transactions (get-transactions-by-email email "all")]
+        ]
     {:status 200
      :headers {"Content-Type" "text/html"}
-     :body (str (dashviews/overview-component transactions))}))
+     :body (str (dashviews/overview-component (get-all-data email)))}))
 
 (defn forms
   [_]

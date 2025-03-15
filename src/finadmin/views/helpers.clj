@@ -1,4 +1,6 @@
 (ns finadmin.views.helpers
+  (:require
+   [clojure.data.json :as json]) 
   (:import
    [java.sql Timestamp]
    [java.time.format DateTimeFormatter]
@@ -30,7 +32,6 @@
                      "Balance Sheet", "Profit & Loss Statement",
                      "General Ledger Report", "Purchase Order"])
 
-
 (defn parse-and-format-date [datetime]
   (if (instance? Timestamp datetime)
     (let [output-formatter (.withLocale (DateTimeFormatter/ofPattern "d MMMM yyyy - HH:mm:ss") Locale/ENGLISH)
@@ -47,18 +48,69 @@
       (.format local-datetime output-formatter))
     (throw (IllegalArgumentException. "Expected a java.sql.Timestamp object"))))
 
+(defn count-by-key
+  [key data]
+  (json/write-str
+   (reduce (fn [acc item]
+             (let [value (key item)]
+               (update acc value (fnil inc 0))))
+           {}
+           data)))
 
-(defn group-type-transactions [data]
-  (let [grouped (group-by :transactions/transaction_type data)
-        total (reduce + (map :transactions/amount data))]
-    (mapv (fn [[type txns]]
-            {:type (name type)
-             :amount (double (reduce + (map :transactions/amount txns)))})
-          grouped)
-    (conj (mapv (fn [[type txns]]
-                  {:type (name type)
-                   :amount (double (reduce + (map :transactions/amount txns)))})
-                grouped)
-          {:type "all" :amount (double total)})))
+(defn total-amount-per-currency [records]
+ (->> records
+      (group-by :transactions/currency)
+      (map (fn [[currency records]]
+             [currency (reduce + (map :transactions/amount records))]))))
 
+(defn extract-year-month
+  [datetime]
+  (if (instance? Timestamp datetime)
+    (let [local-datetime (.toLocalDateTime datetime)
+          year (.getYear local-datetime)
+          month (.getMonthValue local-datetime)]
+      {:year year
+       :month month})
+    (throw (IllegalArgumentException. "Expected a java.sql.Timestamp object"))))
 
+(defn group-by-month-and-currency [transactions]
+  (->> transactions
+       (map #(update % :transactions/transaction_date extract-year-month))
+       (group-by #(vector (:transactions/currency %) (:transactions/transaction_date %)))))
+
+(defn aggregate-transactions [grouped-transactions]
+  (let [months (range 1 13)]
+    (reduce (fn [result [currency-month transactions]]
+              (let [[currency {}] currency-month
+                    ;; Separate expenses and invoices
+                    expenses (filter #(contains? % :expenses/expense_id) transactions)
+                    invoices (filter #(contains? % :invoices/invoice_id) transactions)
+
+                    ;; Function to aggregate by month
+                    aggregate-by-month (fn [txns]
+                                         (reduce (fn [acc month]
+                                                   (let [month-transactions (->> txns
+                                                                                 (filter #(= month (:month (:transactions/transaction_date %))))
+                                                                                 (map #(double (:transactions/amount %))))]
+                                                     (assoc acc month (reduce + 0.0 month-transactions))))
+                                                 (zipmap months (repeat 0.0))
+                                                 months))
+
+                    expense-entry (when (seq expenses)
+                                    {:label (str currency " Expenses")
+                                     :data (map (aggregate-by-month expenses) months)
+                                     :stack "expense"
+                                     :backgroundColor "red"})
+
+                    invoice-entry (when (seq invoices)
+                                    {:label (str currency " Invoices")
+                                     :data (map (aggregate-by-month invoices) months)
+                                     :stack "invoice"
+                                     :backgroundColor "blue"})]
+
+                ;; Add non-nil entries to the result
+                (cond-> result
+                  expense-entry (conj expense-entry)
+                  invoice-entry (conj invoice-entry))))
+            []
+            grouped-transactions)))

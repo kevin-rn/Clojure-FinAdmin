@@ -16,7 +16,7 @@ main {
     margin-bottom: 5px;
 }
 
-#dashboard-content > div:not(#popup) {
+#dashboard-content > div:not(#popup, #overview-component) {
     margin-bottom: 20px;
     box-shadow: 0 4px 8px 0 var(--box-shadow-clr), 0 6px 20px 0 var(--box-shadow-clr);
     padding: 25px;
@@ -57,6 +57,29 @@ main {
     pointer-events: none;
     opacity: 0.5;
   }
+
+div#overview-component {
+    background-color: var(--box-clr);
+    max-height: 100%;
+}
+
+div.chart-div {
+    box-shadow: 0 4px 8px 0 var(--box-shadow-clr), 0 6px 20px 0 var(--box-shadow-clr);
+    padding: 20px;
+    border-radius: 0.5em;
+    background-color: white;
+    margin: 5px;
+}
+
+div.chart-div:first-child {
+    overflow-y: auto;
+}
+
+div.chart-div table {
+    font-size: 12px;
+    margin-right: 20px;
+}
+
 
 #settings-form > div {
     user-select: none;
