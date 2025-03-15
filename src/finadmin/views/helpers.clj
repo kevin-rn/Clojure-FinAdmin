@@ -4,7 +4,7 @@
    [java.time.format DateTimeFormatter]
    [java.util Locale]))
 
-(def approval-status ["Pending" "Approved" "Rejected" "In Progress" 
+(def approval-status ["Pending" "Approved" "Rejected" "In Progress"
                       "On Hold" "Completed" "Needs Revision" "Escalated"])
 
 (def currencies ["ARS" "AUD" "BHD" "BRL" "CAD" "CHF"
@@ -38,11 +38,27 @@
       (.format local-datetime output-formatter))
     (throw (IllegalArgumentException. "Expected a java.sql.Timestamp object"))))
 
-(defn parse-and-format-date-input 
+(defn parse-and-format-date-input
   " ISO 8601 format (yyyy-MM-dd), "
   [datetime]
   (if (instance? Timestamp datetime)
     (let [output-formatter (.withLocale (DateTimeFormatter/ofPattern "yyyy-MM-dd") Locale/ENGLISH)
-          local-datetime (.toLocalDateTime datetime)] 
+          local-datetime (.toLocalDateTime datetime)]
       (.format local-datetime output-formatter))
     (throw (IllegalArgumentException. "Expected a java.sql.Timestamp object"))))
+
+
+(defn group-type-transactions [data]
+  (let [grouped (group-by :transactions/transaction_type data)
+        total (reduce + (map :transactions/amount data))]
+    (mapv (fn [[type txns]]
+            {:type (name type)
+             :amount (double (reduce + (map :transactions/amount txns)))})
+          grouped)
+    (conj (mapv (fn [[type txns]]
+                  {:type (name type)
+                   :amount (double (reduce + (map :transactions/amount txns)))})
+                grouped)
+          {:type "all" :amount (double total)})))
+
+

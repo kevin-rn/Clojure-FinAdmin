@@ -16,16 +16,18 @@
       (if (some? email)
         {:status 200
          :headers {"Content-Type" "text/html"}
-         :body (dashviews/dashboard email)}
+         :body (dashviews/dashboard email (get-transactions-by-email email "all"))}
         {:status 302
          :headers {"Location" "/"}
          :session nil}))))
 
 (defn overview
-  [_]
-  {:status 200
-   :headers {"Content-Type" "text/html"}
-   :body (str (dashviews/overview-component))})
+  [request]
+  (let [{:keys [email]} (:session request)
+        transactions (get-transactions-by-email email "all")]
+    {:status 200
+     :headers {"Content-Type" "text/html"}
+     :body (str (dashviews/overview-component transactions))}))
 
 (defn forms
   [_]

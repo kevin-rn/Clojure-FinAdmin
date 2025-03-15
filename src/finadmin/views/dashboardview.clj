@@ -1,15 +1,25 @@
 (ns finadmin.views.dashboardview
-    (:require
-     [finadmin.views.helpers :refer [document-types parse-and-format-date]]
-     [hiccup.page :refer [include-css include-js]]
-     [hiccup2.core :as h]))
+  (:require
+   [clojure.data.json :as json]
+   [finadmin.views.helpers :refer [document-types group-type-transactions
+                                   parse-and-format-date]]
+   [hiccup.page :refer [include-css include-js]]
+   [hiccup2.core :as h]))
+
 
 
 (defn overview-component
-  []
-  (h/html
-   [:div
-    [:p "overview"]]))
+  [data]
+  (let [transaction-data (group-type-transactions data)
+        transActionDataStr (str "const transactionData = " (json/write-str transaction-data) "; ")
+        jscode (str transActionDataStr "window.onload = function() { createTransactionPlot(); }")]
+    (h/html
+     [:div
+      [:p "Overview"]
+      [:div
+       [:canvas#transactionChart]]
+      [:script {:src "/js/plot.js" :defer true}]
+      [:script {:type "text/javascript" :defer true} (h/raw jscode)]])))
 
 (defn forms-component
   []
@@ -189,7 +199,7 @@
     [:div {:id "warning-sign"} [:p  "*This feature has not been implemented."]]]))
 
 (defn dashboard
-  [email]
+  [email transactions]
   (str "<!DOCTYPE html>"
        (h/html
         [:html
@@ -199,6 +209,7 @@
           (include-css "/css/dashboard.css")
           (include-js "https://unpkg.com/htmx.org@2.0.4")
           (include-js "https://code.jquery.com/jquery-3.6.0.min.js")
+          (include-js "https://cdn.jsdelivr.net/npm/chart.js")
           [:script {:src "/js/app.js" :defer true}]
           [:link {:href "https://fonts.googleapis.com/css?family=Montserrat:400,900" :rel "stylesheet"}]
           [:link {:rel "shortcut icon" :href "/favicon.ico" :type "image/x-icon"}]]
@@ -247,5 +258,5 @@
                    [:span "Log out"]]]]]
 
            [:main {:class "flex items-center justify-center"}
-            [:div {:id "dashboard-content" :class "min-w-3/4"}
-             (overview-component)]]]]])))
+            [:div {:id "dashboard-content" :class "min-w-3/4"} 
+             (overview-component transactions)]]]]])))
