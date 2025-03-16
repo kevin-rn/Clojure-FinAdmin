@@ -36,22 +36,45 @@
 (def invoice-columns
   #{:invoice_number :vendor_name :po_number :vat_code :payment_terms :due_date :payment_status})
 
-(defn filter-valid-keys [updates valid-columns]
+
+(defn filter-valid-keys 
+  "Filters a given map `updates`, keeping only keys that exist in `valid-columns`.
+     
+     Parameters:
+     - updates: A map containing the fields to be updated.
+     - valid-columns: A set of allowed column names.
+     
+     Returns:
+     - A filtered map containing only valid keys."
+  [updates valid-columns]
   (select-keys updates valid-columns))
 
-(defn parse-value [k v]
+
+(defn parse-value
+  "Parses a value based on its key.
+   
+   Parameters:
+   - k: The key representing the field name.
+   - v: The value to be parsed.
+   
+   Returns:
+   - A properly formatted value based on its expected type."
+  [k v]
   (cond
     (#{:due_date :expense_date} k) (java.time.LocalDate/parse v)
     (= :amount k) (Double/parseDouble (str v))
     :else v))
 
-;; Transactions
-(defn add-expense-db
-  "Adds a new expense entry to the database, including transaction and expense details.
 
-   Parameters:
-   - email: A string representing the email of the account creating the expense.
-   - expense-details: A map containing the details of the expens."
+(defn add-expense-db
+  "Adds a new expense transaction.
+     
+     Parameters:
+     - email: A string representing the user's email.
+     - expense-details: A map containing the fields from Expenses and Transactions tables.
+   
+   Returns:
+   - The result of the insert operation."
   [email expense-details]
   (jdbc/with-transaction [dc database-connection]
     (let [transaction-result (jdbc/execute! dc
@@ -72,12 +95,16 @@
                       (:approval_status expense-details)
                       (java.time.LocalDate/parse (:expense_date expense-details))]))))
 
+
 (defn add-invoice-db
-  "Adds a new invoice entry to the database, including transaction and invoice details.
-  
+  "Adds a new invoice transaction.
+     
      Parameters:
-     - email: A string representing the email of the account creating the invoice.
-     - invoice-details: A map containing the details of the invoice."
+     - email: A string representing the user's email.
+     - invoice-details: A map containing the fields from Invoices and Transactions tables.
+     
+     Returns:
+     - The result of the insert operation."
   [email invoice-details]
   (jdbc/with-transaction [dc database-connection]
     (let [transaction-result (jdbc/execute! dc [insert-transaction-query
@@ -98,6 +125,7 @@
                              (java.time.LocalDate/parse (:due_date invoice-details))
                              (:payment_status invoice-details)]))))
 
+
 (defn get-transactions-by-email
   "Retrieves transactions for a specific user based on their email and optional transaction type.
 
@@ -114,6 +142,7 @@
                 ["SELECT * FROM transactions WHERE account_email = ? AND transaction_type = ?" email transaction-type]
                 :else (throw (ex-info "Invalid transaction type" {:type transaction-type})))]
     (jdbc/execute! database-connection query)))
+
 
 (defn get-expense-transactions-by-email
   "Retrieves expense data along with the associated transaction details for a specific account based on the account's email.
@@ -132,6 +161,7 @@
                     ORDER BY t.transaction_date DESC"
                   email]))
 
+
 (defn get-invoice-transactions-by-email
   "Retrieves expense data along with the associated transaction details for a specific account based on the account's email.
     
@@ -149,6 +179,7 @@
                       ORDER BY t.transaction_date DESC"
                   email]))
 
+
 (defn get-transaction-by-id
   [transaction-id transaction-type]
   (let [query (case (keyword transaction-type)
@@ -157,6 +188,7 @@
                 (throw (IllegalArgumentException. "Invalid transaction type")))
         transaction-id (Integer. transaction-id)]
     (jdbc/execute-one! database-connection [query transaction-id])))
+
 
 (defn build-update-query
   "Generates an UPDATE SQL query and corresponding values for fields that are not nil.
@@ -199,6 +231,7 @@
           [sub-query sub-params] (build-update-query table table-updates transaction-id)]
       (jdbc/execute! dc (into [tx-query] tx-params))
       (jdbc/execute! dc (into [sub-query] sub-params)))))
+
 
 (defn delete-transaction-db
   "Deletes a record (expense or invoice) and its associated transaction from the database.

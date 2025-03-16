@@ -34,7 +34,6 @@ main {
     color: var(--primary-txt-clr);
     padding: 15px 32px;
     margin-top: 5px;
-    /* width: 50%; */
     text-align: center;
     text-decoration: none;
     display: inline-block;
@@ -48,7 +47,8 @@ main {
     color: var(--base-clr);
 }
 
-#dashboard-content button:active:not(.remove-file), #dashboard-content button:focus:not(.remove-file) {
+#dashboard-content button:active:not(.remove-file),
+#dashboard-content button:focus:not(.remove-file) {
     background-color: var(--accent-clr);
     color: var(--primary-txt-clr);
 }
@@ -56,7 +56,7 @@ main {
 #dashboard-content button:disabled {
     pointer-events: none;
     opacity: 0.5;
-  }
+}
 
 div#overview-component {
     background-color: var(--box-clr);
@@ -80,7 +80,6 @@ div.chart-div table {
     margin-right: 20px;
 }
 
-
 #settings-form > div {
     user-select: none;
 }
@@ -96,18 +95,18 @@ div.chart-div table {
         position: relative;
         padding-left: 20px; /* Space for the custom icon */
         margin-bottom: 10px;
-
+        
         > p:first-child {
             font-weight: 520;
             font-style: oblique;
         }
 
-        >a {
+        > a {
             font-style: oblique;
             color: var(--base-clr);
         }
 
-        >a:hover {
+        > a:hover {
             font-style: oblique;
             color: var(--accent-clr);
         }

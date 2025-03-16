@@ -20,7 +20,9 @@
                          :port-number        5432
                          :register-mbeans    false})
 
+
 (defonce datasource
   (delay (cp/make-datasource datasource-options)))
+
 
 (def database-connection {:datasource @datasource})

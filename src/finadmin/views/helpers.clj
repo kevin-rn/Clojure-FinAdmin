@@ -6,6 +6,8 @@
    [java.time.format DateTimeFormatter]
    [java.util Locale]))
 
+
+;; Form Select options
 (def approval-status ["Pending" "Approved" "Rejected" "In Progress"
                       "On Hold" "Completed" "Needs Revision" "Escalated"])
 
@@ -32,15 +34,54 @@
                      "Balance Sheet", "Profit & Loss Statement",
                      "General Ledger Report", "Purchase Order"])
 
-(defn parse-and-format-date [datetime]
+;; Helper methods
+(defn modal-component 
+  "Renders a modal popup with a message if `modal` is not nil.
+  
+       Parameters:
+       - `modal`: A string representing the message to display in the modal.
+  
+       Returns:
+       - A modal popup with the provided message if `modal` is not nil."
+  [modal]
+  (when modal
+    [:div#popup
+     [:div.backdrop]
+     [:dialog {:class "popup" :open true}
+      [:p modal]
+      [:button {:onclick "closeModal(this)"} "Close"]]]))
+
+
+(defn parse-and-format-date 
+  "Parses and formats a Timestamp object into a human-readable date string.
+  
+       Parameters:
+       - `datetime`: A java.sql.Timestamp object representing a date and time.
+  
+       Returns:
+       - A formatted string representing the date and time in the format 'd MMMM yyyy - HH:mm:ss'.
+       
+       Throws:
+       - IllegalArgumentException if the input is not a Timestamp."
+  [datetime]
   (if (instance? Timestamp datetime)
     (let [output-formatter (.withLocale (DateTimeFormatter/ofPattern "d MMMM yyyy - HH:mm:ss") Locale/ENGLISH)
           local-datetime (.toLocalDateTime datetime)]
       (.format local-datetime output-formatter))
     (throw (IllegalArgumentException. "Expected a java.sql.Timestamp object"))))
 
+
 (defn parse-and-format-date-input
-  " ISO 8601 format (yyyy-MM-dd), "
+  "Parses and formats a Timestamp object into an ISO 8601 date string (yyyy-MM-dd).
+
+     Parameters:
+     - `datetime`: A java.sql.Timestamp object representing a date.
+
+     Returns:
+     - A formatted string representing the date in ISO 8601 format 'yyyy-MM-dd'.
+     
+     Throws:
+     - IllegalArgumentException if the input is not a Timestamp."
   [datetime]
   (if (instance? Timestamp datetime)
     (let [output-formatter (.withLocale (DateTimeFormatter/ofPattern "yyyy-MM-dd") Locale/ENGLISH)
@@ -48,7 +89,16 @@
       (.format local-datetime output-formatter))
     (throw (IllegalArgumentException. "Expected a java.sql.Timestamp object"))))
 
+
 (defn count-by-key
+  "Counts occurrences of each value in a collection of maps based on a given key.
+  
+       Parameters:
+       - `key`: A function that extracts the key from each item in the collection.
+       - `data`: A collection of maps or items to be counted.
+  
+       Returns:
+       - A JSON string representing the count of each value corresponding to the provided key."
   [key data]
   (json/write-str
    (reduce (fn [acc item]
@@ -57,13 +107,33 @@
            {}
            data)))
 
-(defn total-amount-per-currency [records]
- (->> records
-      (group-by :transactions/currency)
-      (map (fn [[currency records]]
-             [currency (reduce + (map :transactions/amount records))]))))
+
+(defn total-amount-per-currency
+  "Calculates the total amount for each currency in a list of records.
+  
+       Parameters:
+       - `records`: A collection of transaction records, each containing a currency and amount.
+  
+       Returns:
+       - A sequence of pairs where each pair consists of a currency and its total amount."
+  [records]
+  (->> records
+       (group-by :transactions/currency)
+       (map (fn [[currency records]]
+              [currency (reduce + (map :transactions/amount records))]))))
+
 
 (defn extract-year-month
+  "Extracts the year and month from a Timestamp object.
+  
+       Parameters:
+       - `datetime`: A java.sql.Timestamp object representing a date and time.
+  
+       Returns:
+       - A map containing the year and month of the given datetime.
+  
+       Throws:
+       - IllegalArgumentException if the input is not a Timestamp."
   [datetime]
   (if (instance? Timestamp datetime)
     (let [local-datetime (.toLocalDateTime datetime)
@@ -73,20 +143,35 @@
        :month month})
     (throw (IllegalArgumentException. "Expected a java.sql.Timestamp object"))))
 
-(defn group-by-month-and-currency [transactions]
+
+(defn group-by-month-and-currency
+  "Groups a list of transactions by month and currency.
+  
+       Parameters:
+       - `transactions`: A list of transaction records, each containing a currency and transaction date.
+  
+       Returns:
+       - A map where the keys are vectors of [currency, year-month], and the values are lists of transactions."
+  [transactions]
   (->> transactions
        (map #(update % :transactions/transaction_date extract-year-month))
        (group-by #(vector (:transactions/currency %) (:transactions/transaction_date %)))))
 
-(defn aggregate-transactions [grouped-transactions]
+
+(defn aggregate-transactions 
+  "Aggregates transactions by month and currency, separating expenses and invoices.
+  
+       Parameters:
+       - `grouped-transactions`: A map of transactions grouped by currency and month.
+  
+       Returns:
+       - A list of aggregated data entries for expenses and invoices, with monthly totals for each."
+  [grouped-transactions]
   (let [months (range 1 13)]
     (reduce (fn [result [currency-month transactions]]
               (let [[currency {}] currency-month
-                    ;; Separate expenses and invoices
                     expenses (filter #(contains? % :expenses/expense_id) transactions)
                     invoices (filter #(contains? % :invoices/invoice_id) transactions)
-
-                    ;; Function to aggregate by month
                     aggregate-by-month (fn [txns]
                                          (reduce (fn [acc month]
                                                    (let [month-transactions (->> txns
@@ -95,20 +180,15 @@
                                                      (assoc acc month (reduce + 0.0 month-transactions))))
                                                  (zipmap months (repeat 0.0))
                                                  months))
-
                     expense-entry (when (seq expenses)
                                     {:label (str currency " Expenses")
                                      :data (map (aggregate-by-month expenses) months)
-                                     :stack "expense"
-                                     :backgroundColor "red"})
+                                     :stack "expense"})
 
                     invoice-entry (when (seq invoices)
                                     {:label (str currency " Invoices")
                                      :data (map (aggregate-by-month invoices) months)
-                                     :stack "invoice"
-                                     :backgroundColor "blue"})]
-
-                ;; Add non-nil entries to the result
+                                     :stack "invoice"})]
                 (cond-> result
                   expense-entry (conj expense-entry)
                   invoice-entry (conj invoice-entry))))

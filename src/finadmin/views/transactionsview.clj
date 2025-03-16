@@ -1,18 +1,25 @@
 (ns finadmin.views.transactionsview
   (:require
-   [finadmin.views.helpers :refer [approval-status currencies expense-types
-                                   parse-and-format-date
-                                   parse-and-format-date-input payment-methods
-                                   payment-status]]
+   [finadmin.views.helpers :as helpers]
    [hiccup2.core :as h]))
 
 (defn transactions-list
-  [transactions {:keys [modal]}]
+  "Generates an HTML table displaying a list of transactions.
+   The table allows for sorting by clicking on column headers. 
+   If no transactions are available, a message is shown indicating that there are no transactions stored.
+  
+    Args:
+      transdata (list): A list of transaction data to be displayed.
+      modal (map): Modal configuration, if any, that may be included in the view.
+  
+    Returns:
+      An HTML table displaying the transaction data, with sorting functionality and a modal component."
+  [{:keys [transdata modal]}]
   (h/html
    [:table {:class "w-full" :id "transaction-table"}
     [:thead
      [:tr
-      [:th {:class "font-semibold text-left" :onclick "sortTable(0, this)"} "Date" 
+      [:th {:class "font-semibold text-left" :onclick "sortTable(0, this)"} "Date"
        [:span.sort-icon
         [:img {:src "/icons/dropdown.svg" :id "sort-btn-initial" :alt "Sort asc"}]]]
       [:th {:class "font-semibold text-left" :onclick "sortTable(1, this)"} "Amount" [:span.sort-icon]]
@@ -21,31 +28,34 @@
       [:th {:class "font-semibold text-left" :onclick "sortTable(4, this)"} "Description" [:span.sort-icon]]
       [:th {:class "font-semibold text-left" :onclick "sortTable(5, this)"} "Payment method" [:span.sort-icon]]]]
 
-    (if (empty? transactions)
+    (if (empty? transdata)
       [:tbody
        [:tr {:class "text-center non-items"}
         [:td {:colspan "6"} [:i.select-none "No Transactions stored"]]]]
       [:tbody
-       (for [{:transactions/keys [transaction_id transaction_date amount currency transaction_type description payment_method]} transactions]
+       (for [{:transactions/keys [transaction_id transaction_date amount currency transaction_type description payment_method]} transdata]
          [:tr {:class "border-b"
                :hx-get (str "/transaction/" transaction_id "/" transaction_type)
                :hx-target "#transactions-container"
                :hx-trigger "click"}
-          [:td (parse-and-format-date transaction_date)]
+          [:td (helpers/parse-and-format-date transaction_date)]
           [:td amount]
           [:td currency]
           [:td transaction_type]
           [:td description]
           [:td payment_method]])])]
+   (helpers/modal-component modal)))
 
-   (when modal
-     [:div#popup
-      [:div.backdrop]
-      [:dialog {:class "popup" :open true}
-       [:p "Transaction has been deleted succesfully!"]
-       [:button {:onclick "closeModal(this)"} "Close"]]])))
 
 (defn expense-details 
+  "Generates an HTML form, which is part of transaction-details method, displaying the details of an expense transaction.
+   All fields are initially disabled from input until the edit button has been toggled.
+  
+    Args:
+      transaction (map): A map containing the details of the expense transaction to be displayed.
+  
+    Returns:
+      An HTML table displaying the details of the expense transaction."
   [transaction]
   (h/html
    [:tr
@@ -54,7 +64,7 @@
           [:select {:name "expense_type"
                     :required true
                     :disabled true}
-           (for [expense-type expense-types]
+           (for [expense-type helpers/expense-types]
              [:option {:value expense-type 
                        :selected (if (= expense-type (:expenses/expense_type transaction)) "selected" nil)} expense-type])]
           [:span.custom-select-arrow]]]]
@@ -70,7 +80,8 @@
    [:tr
     [:td "Business Purpose"]
     [:td [:textarea {:name "business_purpose"
-                     :class "w-full h-48 resize-none"
+                     :placeholder "Enter the business purpose here..."
+                     :class "w-full resize-none"
                      :disabled true}
           (:expenses/business_purpose transaction)]]]
    [:tr
@@ -79,7 +90,7 @@
           [:select {:name "approval_status"
                     :required true
                     :disabled true}
-           (for [status approval-status]
+           (for [status helpers/approval-status]
              [:option {:value status 
                        :selected (if (= status (:expenses/approval_status transaction)) "selected" nil)} status])]
           [:span.custom-select-arrow]]]]
@@ -88,10 +99,18 @@
     [:td [:input.w-full {:type "date"
                          :name "expense_date"
                          :required true
-                         :value (parse-and-format-date-input (:expenses/expense_date transaction))
+                         :value (helpers/parse-and-format-date-input (:expenses/expense_date transaction))
                          :disabled true}]]]))
 
 (defn invoice-details
+  "Generates an HTML form, which is part of transaction-details method, displaying the details of an invoice transaction.
+   All fields are initially disabled from input until the edit button has been toggled.
+  
+    Args:
+      transaction (map): A map containing the details of the invoice transaction to be displayed.
+  
+    Returns:
+      An HTML table displaying the details of the invoice transaction."
   [transaction]
   (h/html
    [:tr
@@ -134,7 +153,7 @@
     [:td [:input.w-full {:type "date" 
                          :name "due_date" 
                          :required true 
-                         :value (parse-and-format-date-input (:invoices/due_date transaction) )
+                         :value (helpers/parse-and-format-date-input (:invoices/due_date transaction))
                          :disabled true}]]]
    [:tr
     [:td "Payment Status"]
@@ -142,14 +161,24 @@
           [:select {:name "payment_status" 
                     :required true 
                     :disabled true}
-           (for [status payment-status]
+           (for [status helpers/payment-status]
              [:option {:value status 
                        :selected (if (= status (:invoices/payment_status transaction)) "selected" nil)} status])]
           [:span.custom-select-arrow]]]]))
 
 
 (defn transaction-details
-  [transaction {:keys [modal]}]
+  "Generates an HTML page displaying the detailed view of a specific transaction (expense or invoice).
+    The page also includes options to delete or update the transaction.
+    All fields are initially disabled from input until the edit button has been toggled.
+  
+    Args:
+      transaction (map): A map containing the details of the transaction to be displayed.
+      modal (map): Modal configuration, if any, that may be included in the view.
+  
+    Returns:
+      An HTML page displaying the transaction details, along with options for editing or deleting the transaction."
+  [{:keys [transaction modal]}]
   (let [transaction-type (:transactions/transaction_type transaction)]
     (h/html
      [:div
@@ -163,7 +192,7 @@
         [:tbody
          [:tr
           [:td "Transaction Date"]
-          [:td (parse-and-format-date (:transactions/transaction_date transaction))]]
+          [:td (helpers/parse-and-format-date (:transactions/transaction_date transaction))]]
          [:tr
           [:td "Amount"]
           [:td [:input.w-full {:type "number"
@@ -179,7 +208,7 @@
                 [:select {:name "currency"
                           :required true
                           :disabled true}
-                 (for [currency currencies]
+                 (for [currency helpers/currencies]
                    [:option {:value currency
                              :selected (if (= currency (:transactions/currency transaction)) "selected" nil)} currency])]
                 [:span.custom-select-arrow]]]]
@@ -189,7 +218,8 @@
          [:tr
           [:td "Description"]
           [:td [:textarea {:name "description"
-                           :class "w-full h-48 resize-none"
+                           :placeholder "Write a detailed description here..."
+                           :class "w-full resize-none"
                            :disabled true} (:transactions/description transaction)]]]
          [:tr
           [:td "Payment Method"]
@@ -197,7 +227,7 @@
                  [:select {:name "payment_method"
                            :required true
                            :disabled true}
-                  (for [method payment-methods]
+                  (for [method helpers/payment-methods]
                     [:option {:value method
                               :selected (if (= method (:transactions/payment_method transaction)) "selected" nil)} method])]
                  [:span.custom-select-arrow]]]]
@@ -221,16 +251,20 @@
         [:div {:class "checkbox"}
          [:input {:type "checkbox" :onclick "toggleEditFields(this)"}]
          [:i  "Enable Editing"]]]]
+      (helpers/modal-component modal)])))
 
-      (when modal
-        [:div#popup
-         [:div.backdrop]
-         [:dialog {:class "popup" :open true}
-          [:p "Transaction has been succesfully updated!"]
-          [:button {:onclick "closeModal(this)"} "Close"]]])])))
 
 (defn transactions-component
-  [transactions key_map]
+  "Generates an HTML component for displaying the history of transactions. 
+   It includes a filter to select between different types of transactions (all, invoices, or expenses).
+  
+    Args:
+      params (map): A map containing the parameters to be passed to the 'transactions-list' function, 
+                    including the transaction data and modal configuration.
+  
+    Returns:
+     An HTML component displaying the transaction history, along with a filter for transaction types."
+  [params]
   (h/html
    [:div {:id "transactions-container" :class "h-[80vh] flex flex-col"}
     [:h2 "Transaction History"]
@@ -249,19 +283,23 @@
       [:span.custom-select-arrow]]]
 
     [:div {:class "flex-1 overflow-auto mt-8" :id "transaction-list"}
-     (transactions-list transactions key_map)]]))
+     (transactions-list params)]]))
+
 
 (defn expenses-component
+  "Generates an HTML form for adding a new expense. 
+   It uses a modal component for displaying additional popup information.
+  
+    Args:
+      modal (map): Modal configuration, if any, that may be included in the view.
+  
+    Returns:
+      An HTML form for adding a new expense."
   [{:keys [modal]}]
   (h/html
    [:div#expense-form
     [:h2 "Add Expense"]
-    (when modal
-      [:div#popup
-       [:div.backdrop]
-       [:dialog {:class "popup" :open true}
-        [:p "Expense has been registered succesfully!"]
-        [:button {:onclick "closeModal(this)"} "Close"]]])
+    (helpers/modal-component modal)
     [:form {:class "grid grid-cols-3 gap-4"
             :hx-post "/add-expense"
             :hx-target "#expense-form"}
@@ -282,7 +320,7 @@
         [:div.custom-select
          [:select {:name "currency" 
                    :required true}
-          (for [currency currencies]
+          (for [currency helpers/currencies]
             [:option {:value currency
                        :selected (if (= currency "EUR") "selected" nil)} currency])]
          [:span.custom-select-arrow]]]
@@ -293,7 +331,8 @@
        [:div {:class "input-group col-span-3"}
         [:label "Description:"]
         [:textarea {:name "description" 
-                    :class "w-full h-48 resize-none"}]]]]
+                    :placeholder "Write a detailed description here..."
+                    :class "w-full resize-none"}]]]]
 
      ;; Payment Information
      [:fieldset {:class "col-span-3 border p-4 rounded"}
@@ -305,7 +344,7 @@
          [:select
           {:name "expense_type"
            :required true}
-          (for [expense-type expense-types]
+          (for [expense-type helpers/expense-types]
             [:option {:value expense-type
                       :selected (if (= expense-type "Operating Expenses") "selected" nil)} expense-type])]
          [:span.custom-select-arrow]]]
@@ -314,7 +353,7 @@
         [:div.custom-select
          [:select {:name "payment_method" 
                    :required true}
-          (for [method payment-methods]
+          (for [method helpers/payment-methods]
             [:option {:value method
                       :selected (if (= method "Bank transfer") "selected" nil)} method])]
          [:span.custom-select-arrow]]]]]
@@ -337,30 +376,33 @@
         [:div.custom-select
          [:select {:name "approval_status" 
                    :required true}
-          (for [status approval-status]
+          (for [status helpers/approval-status]
             [:option {:value status 
                       :selected (if (= status "Pending") "selected" nil)} status])]
          [:span.custom-select-arrow]]]
        [:div {:class "input-group col-span-2"}
         [:label "Business Purpose:"]
         [:textarea {:name "business_purpose" 
-                    :class "w-full h-48 resize-none"}]]]]
+                    :placeholder "Enter the business purpose here..."
+                    :class "w-full resize-none"}]]]]
 
      [:button {:type "submit"} "Submit"]]]))
 
+
 (defn invoices-component
+  "Generates an HTML form for adding a new invoice. 
+   It uses a modal component for displaying additional popup information.
+  
+    Args:
+      modal (map): Modal configuration, if any, that may be included in the view.
+  
+    Returns:
+      An HTML form for adding a new invoice."
   [{:keys [modal]}]
   (h/html
    [:div#invoice-form
     [:h2 "Add Invoice"]
-    (when modal
-      [:div#popup
-       [:div.backdrop]
-       [:dialog {:class "popup" 
-                 :open true}
-        [:p "Invoice has been registered succesfully!"]
-        [:button {:onclick "closeModal(this)"} "Close"]]]) 
-
+    (helpers/modal-component modal)
     [:form {:class "grid grid-cols-3 gap-4"
             :hx-post "/add-invoice"
             :hx-target "#invoice-form"}
@@ -386,14 +428,15 @@
         [:div.custom-select
          [:select {:name "currency"
                    :required true}
-          (for [currency currencies]
+          (for [currency helpers/currencies]
             [:option {:value currency
                       :selected (if (= currency "EUR") "selected" nil)} currency])]
          [:span.custom-select-arrow]]]
        [:div {:class "input-group col-span-3"}
         [:label "Description:"]
         [:textarea {:name "description"
-                    :class "w-full h-48 resize-none"}]]]]
+                    :placeholder "Write a detailed description here..."
+                    :class "w-full resize-none"}]]]]
 
      ;; Vendor Information
      [:fieldset {:class "col-span-3 border p-4 rounded"}
@@ -424,7 +467,7 @@
         [:div.custom-select
          [:select {:name "payment_method"
                    :required true}
-          (for [method payment-methods]
+          (for [method helpers/payment-methods]
             [:option {:value method
                       :selected (if (= method "Bank transfer") "selected" nil)} method])]
          [:span.custom-select-arrow]]]
@@ -443,7 +486,7 @@
         [:div.custom-select
          [:select {:name "payment_status"
                    :required true}
-          (for [status payment-status]
+          (for [status helpers/payment-status]
             [:option {:value status 
                       :selected (if (= status "Unpaid") "selected" nil)} status])]
          [:span.custom-select-arrow]]]]]

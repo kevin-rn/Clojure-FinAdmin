@@ -72,7 +72,6 @@
 
 #document-files li::before {
     content: '';
-
     position: absolute;
     left: 0;
     transform: translate(50%, 0);
@@ -119,10 +118,30 @@ dialog.popup {
     z-index: 4;
   }
 
+/* Form input styling */
+#invoice-form fieldset, 
+#expense-form fieldset {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.input-group {
+    margin: 10px;
+
+    > label {
+        margin-right: 5px;
+    }
+}
+
+fieldset > legend {
+    font-style:oblique;
+    font-size: 14px
+}
 
 /* Form Select options styling */
 select {
     padding: 0.5em 4em 0.5em 1em;
+    border-radius: 5px;
     background: var(--select-clr);
     color: var(--primary-txt-clr);
     border: 0;
@@ -130,13 +149,18 @@ select {
     /* appearance: none; */
 }
 
-.custom-select{
+select:hover:enabled {
+    background: color-mix(in srgb, var(--select-clr), transparent 10%);
+}
+
+.custom-select {
     position: relative;
     display: inline-block;
 }
 
 .custom-select-arrow {
     position: absolute;
+    border-radius: 5px;
     top: 0;
     right:0;
     display: block;
@@ -171,27 +195,6 @@ select {
     top: 65%;
 }
 
-
-/* Form input styling */
-#invoice-form fieldset, #expense-form fieldset {
-    margin-top: 10px;
-    margin-bottom: 10px;
-}
-
-.input-group {
-    margin: 10px;
-
-    > label {
-        margin-right: 5px;
-    }
-}
-
-fieldset > legend {
-    font-style:oblique;
-    font-size: 14px
-}
-
-/* Checkbox styling */
 /* https://moderncss.dev/pure-css-custom-checkbox-style/ */
 input[type="checkbox"]:not(.visibility) {
     -webkit-appearance: none;
@@ -223,10 +226,10 @@ input[type="checkbox"]:not(.visibility):checked::before {
     transform: scale(1);
 }
   
-  /* input[type="checkbox"]:focus {
+/* input[type="checkbox"]:focus {
     outline: max(2px, 0.15em) solid currentColor;
     outline-offset: max(2px, 0.15em);
-  } */
+} */
 
 .checkbox {
     display: flex;
@@ -238,6 +241,44 @@ input[type="checkbox"]:not(.visibility):checked::before {
         font-size: 14px;
         user-select:none;
     }
+}
+
+input[type="date"] {
+    background-color: color-mix(in srgb, var(--border-clr), transparent 50%); 
+    box-sizing: border-box;
+    padding: 0.5em;
+    border: none;
+    outline: none;
+    font-size: 14px;
+    border-radius: 5px;
+}
+
+input[type="date"]:hover:enabled {
+    background-color: color-mix(in srgb, var(--accent-clr), transparent 50%); 
+}
+
+textarea {
+    background-color: color-mix(in srgb, var(--border-clr), transparent 50%); 
+    padding: 0.5em;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    outline: none;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 1.4;
+    transition: all 0.2s;
+    box-sizing: border-box;
+}
+
+textarea:hover:enabled {
+    cursor: pointer;
+    background-color: color-mix(in srgb, var(--accent-clr), transparent 50%); 
+}
+
+textarea:focus {
+    cursor: text;
+    background-color: var(--primary-txt-clr);
+    border-color: var(--border-clr);
 }
 
 /* Visibility toggle styling (show password) */
@@ -319,11 +360,9 @@ table {
     td {
         padding: 5px;
     }
-
-
 }
 
-table tr:nth-child(even) td {
+table tr:nth-child(odd) td {
     background-color: var(--box-clr);
 }
 
@@ -335,7 +374,8 @@ table tr:nth-child(even) td {
     }
 }
 
-#transaction-table tr:focus:not(.non-items), #transaction-table tr:active:not(.non-items) {
+#transaction-table tr:focus:not(.non-items), 
+#transaction-table tr:active:not(.non-items) {
     background-color: var(--secondary-txt-clr);
     cursor: pointer;
 }

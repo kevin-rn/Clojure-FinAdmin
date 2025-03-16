@@ -21,6 +21,7 @@
       (jdbc/execute-one! database-connection
                          ["INSERT INTO accounts (email, password) VALUES (?, ?)" email hashed-password]))))
 
+
 (defn email-exists?
   "Checks if the provided email exists in the database.
 
@@ -34,6 +35,7 @@
     false
     (let [result (jdbc/execute! database-connection ["SELECT COUNT(1) FROM accounts WHERE email = ?" email])]
       (> (get (first result) :count) 0))))
+
 
 (defn verify-account?
   "Verifies if the given email and password match an existing account.
@@ -50,6 +52,7 @@
         result (jdbc/execute-one! database-connection [query email])]
     (when-let [stored-hash (:accounts/password result)]
       (:valid (hashers/verify password stored-hash {:alg :pbkdf2+sha256})))))
+
 
 (defn get-account-info
   "Retrieves all information for given email and password match an existing account.
@@ -68,11 +71,22 @@
       (assoc result :accounts/password password)
       false)))
 
+
 (defn update-password-db
+  "Updates the password for a given user account.
+    
+    Parameters:
+    - `email`: A string representing the user's email address.
+    - `new-password`: A string representing the new password to be set.
+    
+    The function hashes the new password using PBKDF2+SHA256 before updating the database.
+    
+    Returns the result of the update operation."
   [email new-password]
   (let [query "UPDATE accounts SET password = ? WHERE email = ?"
         hashed-new-password (hashers/derive new-password {:alg :pbkdf2+sha256})]
     (jdbc/execute-one! database-connection [query hashed-new-password email])))
+
 
 (defn delete-account-db
   "Deletes a user account and all associated transactions (on cascade also invoices and expenses).

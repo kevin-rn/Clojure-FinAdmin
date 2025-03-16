@@ -162,7 +162,8 @@ button:hover {
     color: var(--base-clr);
 }
 
-button:active, button:focus {
+button:active, 
+button:focus {
     background-color: var(--accent-clr);
     color: var(--primary-txt-clr);
 }
@@ -177,7 +178,7 @@ button:active, button:focus {
     transition-duration: 0.4s;
 }
 
-.sign-text:hover{
+.sign-text:hover {
     color: var(--accent-clr);
     text-decoration: none;
 }

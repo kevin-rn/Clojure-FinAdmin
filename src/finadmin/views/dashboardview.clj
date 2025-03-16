@@ -1,19 +1,30 @@
 (ns finadmin.views.dashboardview
   (:require
    [clojure.data.json :as json]
-   [finadmin.views.helpers :refer [aggregate-transactions count-by-key
-                                   document-types group-by-month-and-currency
-                                   parse-and-format-date
-                                   total-amount-per-currency]]
+   [finadmin.views.helpers :as helpers]
    [hiccup.page :refer [include-css include-js]]
    [hiccup2.core :as h]))
 
+
 (defn overview-component
+  "Generates the overview section of the dashboard, including:
+     - Total expenses and invoices, broken down by currency.
+     - Pie chart displaying the distribution of expenses by type.
+     - Stacked bar chart showing the currency distribution of expenses and invoices.
+     - Recent transactions for both expenses and invoices.
+  
+     Parameters:
+     - `{:keys [expdata invdata]}`: A map containing expense data (`expdata`) and invoice data (`invdata`).
+     
+     Returns:
+     - An HTML structure for the overview section of the dashboard."
   [{:keys [expdata invdata]}]
-  (let [totalExpense (total-amount-per-currency expdata)
-        totalInvoice (total-amount-per-currency invdata)
-        expenseType (count-by-key :expenses/expense_type expdata)
-        chartData   (json/write-str (aggregate-transactions (group-by-month-and-currency (concat expdata invdata))))
+  (let [totalExpense (helpers/total-amount-per-currency expdata)
+        totalInvoice (helpers/total-amount-per-currency invdata)
+        expenseType (helpers/count-by-key :expenses/expense_type expdata)
+        chartData   (json/write-str (helpers/aggregate-transactions 
+                                     (helpers/group-by-month-and-currency 
+                                      (concat expdata invdata))))
         dataStr (str "var expenseTypeData = " expenseType "; "
                      "var chartData = " chartData "; ")
         jscode (str dataStr "createExpensePieChart(); createStackedBarChart(); ")]
@@ -55,7 +66,7 @@
            [:tbody
             (for [{:transactions/keys [transaction_date amount currency payment_method]} (take 3 expdata)]
               [:tr {:class "border-b non-items"}
-               [:td (parse-and-format-date transaction_date)]
+               [:td (helpers/parse-and-format-date transaction_date)]
                [:td amount]
                [:td currency]
                [:td payment_method]])])]
@@ -74,15 +85,24 @@
            [:tbody
             (for [{:transactions/keys [transaction_date amount currency payment_method]} (take 3 invdata)]
               [:tr {:class "border-b non-items"}
-               [:td (parse-and-format-date transaction_date)]
+               [:td (helpers/parse-and-format-date transaction_date)]
                [:td amount]
                [:td currency]
-               [:td payment_method]])])]]] 
+               [:td payment_method]])])]]]
       
-
+      ;; NOTE: Converted Clojure data to Json string and declared var in Javascript to be used
+      ;; before calling its methods. Probably better not to parse the entire data to json but chunk it instead.
       [:script {:type "text/javascript" :defer true} (h/raw jscode)]])))
 
+
 (defn forms-component
+  "Generates the form for uploading documents related to financial transactions. This includes:
+     - A file upload dropzone allowing multiple document uploads.
+     - Fields for entering transaction date, associated entities (e.g., contractors, suppliers), and document type (e.g., Invoice).
+     - A warning message indicating the document upload feature is not yet implemented.
+  
+     Returns:
+     - An HTML structure for the document upload form."
   []
   (h/html
    [:div#forms-component
@@ -129,14 +149,15 @@
         [:div.custom-select
          [:select {:name "document_type"
                    :required true}
-          (for [type document-types]
+          (for [type helpers/document-types]
             [:option {:value type
                       :selected (if (= type "Invoice") "selected" nil)} type])]
          [:span.custom-select-arrow]]]
        [:div {:class "input-group col-span-3"}
         [:label "Description:"]
         [:textarea {:name "description"
-                    :class "w-full h-48 resize-none"}]]]]
+                    :placeholder "Write a detailed description here..."
+                    :class "w-full resize-none"}]]]]
 
      [:button {:type "submit" :disabled true} "Upload document"]
      [:div {:id "warning-sign" :class "flex justify-end"} [:p  "*This feature has not been implemented."]]]]
@@ -159,7 +180,19 @@
        [:td {:colspan "6"} [:i.select-none "No Documents stored"]]]]
      ]]))
 
+
 (defn settings-component
+  "Generates the settings page for the user, allowing them to view and update their profile information, including:
+     - Displaying user email, password, and creation date.
+     - A form for updating the user's password, including error handling.
+     - A section to warn the user about the permanent deletion of their account.
+     
+     Parameters:
+     - `account`: A map representing the user's account details, including email, password, and account creation date.
+     - `{:keys [error modal]}`: A map containing potential error messages and modal-related popup for the settings page.
+     
+     Returns:
+     - An HTML structure for the settings page, including user profile details, password reset form, and account deletion warning."
   [account {:keys [error modal]}]
   (h/html
    [:div#settings-form
@@ -173,7 +206,7 @@
      [:div {:class "col-span-3"}
       [:p [:i (:accounts/email account)]]
       [:p [:i (:accounts/password account)]]
-      [:p [:i (parse-and-format-date (:accounts/created_at account))]]]]]
+      [:p [:i (helpers/parse-and-format-date (:accounts/created_at account))]]]]]
 
    [:div
     [:h2 "Update Password"]
@@ -201,13 +234,7 @@
      [:button {:type "submit"
                :hx-post "/update-password"
                :hx-target "#dashboard-content"} "Update Password"]]]
-
-   (when modal
-     [:div#popup
-      [:div.backdrop]
-      [:dialog {:class "popup" :open true}
-       [:p "Your password has been updated succesfully!"]
-       [:button {:onclick "closeModal(this)"} "Close"]]])
+   (helpers/modal-component modal)
 
    [:div {:id "warning-sign"}
     [:div
@@ -219,7 +246,15 @@
      [:i  "I acknowledge this decision."]]
     [:button {:type "submit" :id "delete-account-btn" :hx-post "/delete-account" :disabled true} "Delete Account"]]))
 
+
 (defn support-component
+   "Generates the support section of the dashboard, which includes:
+     - A FAQ section with common questions and answers about the app.
+     - A feedback form for users to submit their thoughts or suggestions.
+     - A placeholder indicating that the feedback feature is not yet implemented.
+     
+     Returns:
+     - An HTML structure for the support page, including FAQs and the feedback form."
   []
   (h/html
    [:div {:id "faq-section"}
@@ -251,7 +286,6 @@
       [:p "Do I need an account to use the webapp?"]
       [:p "Yes, otherwise you wouldn't be able to access the dashboard and see this page."]]]]
 
-
    [:div
     [:h2 "Feedback"]
     [:p "We value your feedback. Please let us know how we can improve."]
@@ -259,7 +293,19 @@
     [:button {:type "submit" :disabled true} "Submit Feedback"]
     [:div {:id "warning-sign"} [:p  "*This feature has not been implemented."]]]))
 
+
 (defn dashboard
+  "Generates the entire dashboard page, including:
+     - The page structure with header, sidebar, and main content area.
+     - A navigation menu for accessing different sections of the dashboard.
+     - A dynamically loaded content section based on user interaction (hx-get for partial updates).
+     
+     Parameters:
+     - `email`: The email of the logged-in user, to be displayed in the header.
+     - `data`: A map containing the user's transaction data for rendering the overview component.
+     
+     Returns:
+     - A complete HTML structure for the dashboard page."
   [email data]
   (str "<!DOCTYPE html>"
        (h/html

@@ -3,15 +3,24 @@
      [hiccup.page :refer [include-css include-js]]
      [hiccup2.core :as h]))
 
+
 (defn sign-in
+  "Renders the sign-in page where users can log in with their email and password. 
+     If there is an error (e.g., invalid credentials), it displays the error message.
+       
+       Parameters:
+       - `{:keys [error]}`: A map containing an optional error message to display if login fails.
+       
+       Returns:
+       - A string containing the HTML for the sign-in form, including optional error messages."
   [{:keys [error]}]
   (h/html [:div {:id "sign-in" :class "w-full"}
            [:h1 {:class "text-center sign-title"} "Sign In"]
            [:form {:class "flex flex-col items-center"}
-            (when error
-              [:div {:class "error-message flex items-center"}
-               [:img {:src "/icons/error.svg" :alt "Error message"}]
-               [:p error]])
+           (when error
+             [:div {:class "error-message flex items-center"}
+              [:img {:src "/icons/error.svg" :alt "Error message"}]
+              [:p error]])
             [:div.input-group
              [:span.email-icon]
              [:input {:type "email" :name "email" :required true}]
@@ -29,13 +38,22 @@
              [:span "Don't have an account? "]
              [:a {:href "#" :class "sign-text" :hx-get "/sign-up" :hx-target "#auth-container"} "Sign Up"]]]]))
 
+
 (defn sign-up
+  "Renders the sign-up page where new users can create an account by entering their email and password.
+     It also includes a field to verify the password and displays error messages if necessary.
+       
+       Parameters:
+       - `{:keys [error]}`: A map containing an optional error message to display if the registration fails.
+       
+       Returns:
+       - A string containing the HTML for the sign-up form, including optional error messages."
   [{:keys [error]}]
   (h/html [:div {:id "sign-up" :class "w-full"}
            [:h1 {:class "text-center sign-title"} "Sign Up"]
            [:form {:class "flex flex-col items-center"}
             (when error
-              [:div.error-message
+              [:div {:class "error-message flex items-center"}
                [:img {:src "/icons/error.svg" :alt "Error message"}]
                [:p error]])
             [:div.input-group
@@ -61,7 +79,13 @@
              [:span "Already have an account? "]
              [:a {:href "#" :class "sign-text" :hx-get "/sign-in" :hx-target "#auth-container"} "Sign In"]]]]))
 
+
 (defn login
+   "Renders the login page, which includes the sign-in form, and some welcome text for users who are not yet authenticated.
+     It includes links for users to either sign in or sign up for an account.
+       
+       Returns:
+       - A string containing the full HTML structure of the login page, including external resources like CSS, JS, and fonts."
   []
   (str "<!DOCTYPE html>"
        (h/html

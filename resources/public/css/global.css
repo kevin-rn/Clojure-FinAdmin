@@ -22,6 +22,27 @@
     margin: 0;
 }
 
+html {
+    scrollbar-width: normal;
+    scrollbar-color: var(--accent-clr) color-mix(in srgb, var(--border-clr), transparent 75%); 
+}
+
+html::-webkit-scrollbar {
+    width: 2em;
+}
+
+html::-webkit-scrollbar-thumb {
+    background-color: color-mix(in srgb, var(--accent-clr), transparent 50%);
+}
+
+html::-webkit-scrollbar-thumb:hover {
+    background-color: var(--accent-clr)
+}
+
+html::-webkit-scrollbar-track {
+    background-color: color-mix(in srgb, var(--border-clr), transparent 75%); 
+}
+
 body {
     font-family: 'Montserrat', sans-serif;
     height: 100vh;

@@ -145,7 +145,6 @@ header {
     border-left: solid 2px var(--secondary-txt-clr);
 }
 
-
 #sidebar .sub-menu {
     display: grid;
     grid-template-rows: 0fr;
